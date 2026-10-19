@@ -1,0 +1,21 @@
+// English strings shared across features (buttons, states, accessibility labels). Cross-cutting.
+export const common = {
+  appName: 'SilverAcademy',
+  back: 'Back',
+  retry: 'Try again',
+  dismiss: 'Dismiss',
+  cancel: 'Cancel',
+  confirm: 'Confirm',
+  save: 'Save',
+  loading: 'Loading',
+  select: 'Select an option',
+  emptyTitle: 'Nothing here yet',
+  textSize: 'Text size',
+  textSizeOptions: { '1': 'Normal', '1.25': 'Large', '1.5': 'Extra large' },
+  logout: 'Log out',
+  fieldOptional: 'optional',
+  timeRangeTo: '{start} to {end}',
+  timeRangeDash: '{start} - {end}',
+  dateTimeComma: '{date}, {time}',
+  labelDot: '{label} - {value}',
+} as const;

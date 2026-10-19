@@ -1,0 +1,117 @@
+/* Button, form fields, badge. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn--primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+.btn--secondary {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.btn--danger {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+.btn--danger:hover:not(:disabled) {
+  background: var(--color-danger-hover);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--color-primary);
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.field__label {
+  font-weight: var(--font-weight-medium);
+}
+.field__hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.field__error {
+  color: var(--tone-danger-fg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+.input {
+  min-height: var(--touch-min);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  width: 100%;
+}
+.input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+  border-width: var(--focus-width);
+}
+textarea.input {
+  min-height: calc(var(--touch-min) * 2.5);
+  resize: vertical;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--touch-min);
+}
+.check input {
+  width: var(--touch-min);
+  height: var(--touch-min);
+  flex: none;
+}
+.badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+.tone--info {
+  background: var(--tone-info-bg);
+  color: var(--tone-info-fg);
+}
+.tone--success {
+  background: var(--tone-success-bg);
+  color: var(--tone-success-fg);
+}
+.tone--warning {
+  background: var(--tone-warning-bg);
+  color: var(--tone-warning-fg);
+}
+.tone--danger {
+  background: var(--tone-danger-bg);
+  color: var(--tone-danger-fg);
+}
+.tone--neutral {
+  background: var(--tone-neutral-bg);
+  color: var(--tone-neutral-fg);
+}

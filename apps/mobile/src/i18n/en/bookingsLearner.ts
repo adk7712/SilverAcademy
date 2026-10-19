@@ -1,0 +1,27 @@
+// English strings for the Learner bookings screens (UC #2-3 ViewTicket; task 2.2).
+export const bookingsLearner = {
+  upcomingTitle: 'Upcoming',
+  pastTitle: 'Past and cancelled',
+  emptyTitle: 'No bookings yet',
+  emptyMessage: 'Find a workshop and book your seat.',
+  emptyAction: 'Find workshops',
+  loadFailed: 'Could not load your bookings.',
+  offlineNotice: 'You are offline. Showing bookings saved on this phone, last updated {when}.',
+  status: {
+    CONFIRMED: 'Booked',
+    ATTENDED: 'Attended',
+    CANCELLED: 'Cancelled',
+  },
+  ticketMissing: 'This ticket could not be found.',
+  qrLabel: 'QR code for check-in. Show this to the instructor or volunteer.',
+  ticketCodeTitle: 'Ticket code',
+  ticketCodeHelp: 'If the QR code cannot be scanned, read this code to the staff.',
+  statusTitle: 'Attendance',
+  attendedAt: 'Checked in on {when}',
+  notAttended: 'Not checked in yet',
+  cancelledNote: 'This booking was cancelled. The ticket is no longer valid.',
+  cachedNotice: 'Saved copy, last updated {when}. It works without internet.',
+  venueTitle: 'Venue',
+  whenTitle: 'Date and time',
+  instructorTitle: 'Instructor',
+} as const;

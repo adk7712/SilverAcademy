@@ -1,0 +1,65 @@
+/* Design tokens: every colour, size and spacing used by the kit comes from here (no magic numbers). */
+:root {
+  --color-bg: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-text: #1b1f27;
+  --color-text-muted: #4a5262;
+  --color-border: #aeb6c4;
+  --color-primary: #1f4fa8;
+  --color-primary-hover: #173d83;
+  --color-on-primary: #ffffff;
+  --color-danger: #b3261e;
+  --color-danger-hover: #8c1d17;
+  --color-on-danger: #ffffff;
+  --color-focus: #ffb000;
+  --color-nav-bg: #14243f;
+  --color-nav-text: #eef2fa;
+  --color-nav-active: #2c4d85;
+  --color-overlay: rgb(10 15 25 / 55%);
+
+  --tone-info-bg: #e3edff;
+  --tone-info-fg: #153a7a;
+  --tone-success-bg: #dff3e4;
+  --tone-success-fg: #145a2a;
+  --tone-warning-bg: #fff1cf;
+  --tone-warning-fg: #6b4300;
+  --tone-danger-bg: #fde4e2;
+  --tone-danger-fg: #8c1d17;
+  --tone-neutral-bg: #e8eaee;
+  --tone-neutral-fg: #2c3340;
+
+  --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-size-sm: 0.9375rem;
+  --font-size-base: 1.125rem;
+  --font-size-lg: 1.375rem;
+  --font-size-xl: 1.75rem;
+  --font-weight-medium: 600;
+  --line-height: 1.5;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+
+  --radius: 0.5rem;
+  --radius-pill: 62.5rem;
+  --border-width: 1px;
+  --focus-width: 3px;
+  --shadow-card: 0 1px 3px rgb(20 30 50 / 18%);
+  --shadow-overlay: 0 8px 28px rgb(10 15 25 / 35%);
+
+  /* Overwritten at startup from MIN_TOUCH_TARGET_PX in shared (see applyTokens.ts). */
+  --touch-min: 44px;
+  --sidebar-width: 17rem;
+  --content-max: 80rem;
+  --modal-width: 32rem;
+  --toast-width: 24rem;
+  --form-width: 26rem;
+  --z-sidebar: 20;
+  --z-modal: 40;
+  --z-toast: 50;
+  --transition: 120ms ease-out;
+  --bp-tablet: 64rem;
+}

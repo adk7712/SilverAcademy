@@ -1,0 +1,10 @@
+node_modules
+dist
+build
+.expo
+coverage
+docs
+*.pdf
+package-lock.json
+firebase/.emulator-data
+CLAUDE.md

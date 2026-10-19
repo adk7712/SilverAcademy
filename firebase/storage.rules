@@ -1,0 +1,23 @@
+rules_version = '2';
+// docs/architecture.md section 3.5. Only report attachments are uploaded by clients; everything else is denied.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function active() { return request.auth != null && request.auth.token.get('status', '') == 'ACTIVE'; }
+    function isAdmin() { return active() && 'ADMIN' in request.auth.token.get('roles', []); }
+
+    // MAX_ATTACHMENT_BYTES = 5 MB; types from ATTACHMENT_CONTENT_TYPES. Create-only: no update/delete.
+    match /reportUploads/{uid}/{fileId} {
+      allow create: if active()
+        && resource == null
+        && request.auth.uid == uid
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png)|application/pdf');
+      allow read: if active() && (request.auth.uid == uid || isAdmin());
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

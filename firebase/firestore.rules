@@ -1,0 +1,103 @@
+rules_version = '2';
+// Read-only gates (docs/architecture.md section 3, ADR-005). Every mutation is a callable Cloud Function (Admin SDK
+// bypasses rules), so ALL client create/update/delete are denied. Claims `{ roles, status }` are set by auth functions.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function active() { return signedIn() && request.auth.token.get('status', '') == 'ACTIVE'; }
+    function roles() { return request.auth.token.get('roles', []); }
+    function hasRole(r) { return r in roles(); }
+    function isAdmin() { return active() && hasRole('ADMIN'); }
+    function isMe(uid) { return active() && request.auth.uid == uid; }
+    // Roles allowed to browse workshops (RBAC matrix: Community Partners cannot).
+    function canBrowseWorkshops() {
+      return active() && roles().hasAny(['LEARNER', 'SENIOR_INSTRUCTOR', 'VOLUNTEER', 'ADMIN']);
+    }
+
+    match /users/{uid} {
+      allow get, list: if isMe(uid) || isAdmin();
+    }
+
+    match /instructorProfiles/{uid} {
+      allow get, list: if isMe(uid) || isAdmin();
+    }
+
+    // Rules are not filters: queries must constrain `status` to the public set, or `instructorId == uid`.
+    match /workshops/{workshopId} {
+      allow get, list: if (canBrowseWorkshops() && resource.data.status in ['OPEN', 'COMPLETED', 'CANCELLED'])
+        || (active() && resource.data.instructorId == request.auth.uid)
+        || isAdmin();
+    }
+
+    match /facilities/{facilityId} {
+      allow get, list: if active();
+    }
+
+    // Covers facilities/{id}/slots/{slotId} and the `slots` collection group.
+    match /{path=**}/slots/{slotId} {
+      allow get, list: if active();
+    }
+
+    match /venueRequests/{requestId} {
+      allow get, list: if (active() && (resource.data.instructorId == request.auth.uid
+          || resource.data.partnerId == request.auth.uid))
+        || isAdmin();
+    }
+
+    match /bookings/{bookingId} {
+      allow get, list: if (active() && resource.data.learnerId == request.auth.uid) || isAdmin();
+    }
+
+    match /attendance/{bookingId} {
+      allow get, list: if (active() && (resource.data.learnerId == request.auth.uid
+          || resource.data.instructorId == request.auth.uid))
+        || isAdmin();
+    }
+
+    match /volunteerAssignments/{assignmentId} {
+      allow get, list: if (active() && resource.data.volunteerId == request.auth.uid) || isAdmin();
+    }
+
+    match /feedback/{bookingId} {
+      allow get, list: if (active() && resource.data.learnerId == request.auth.uid) || isAdmin();
+    }
+
+    match /wallets/{uid} {
+      allow get, list: if isMe(uid) || isAdmin();
+      match /ledger/{entryId} {
+        allow get, list: if isMe(uid) || isAdmin();
+      }
+    }
+
+    match /voucherTiers/{tierId} {
+      allow get, list: if active();
+    }
+
+    // NFR 6.3: never readable by clients (admin uses vouchers-listInventory with masked codes).
+    match /voucherInventory/{voucherId} {
+      allow read, write: if false;
+    }
+
+    match /voucherUploads/{batchId} {
+      allow get, list: if isAdmin();
+    }
+
+    match /incidents/{refNo} {
+      allow get, list: if (active() && resource.data.reporterId == request.auth.uid) || isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow get, list: if active() && resource.data.userId == request.auth.uid;
+    }
+
+    match /auditLogs/{logId} {
+      allow get, list: if isAdmin();
+    }
+
+    // No client writes anywhere; unknown paths are denied.
+    match /{document=**} {
+      allow write: if false;
+    }
+  }
+}
