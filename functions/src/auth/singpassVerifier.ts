@@ -9,7 +9,7 @@ import {
   type SingpassIdentity,
   type SingpassVerifier,
 } from '@silveracademy/shared';
-import { authMode, isEmulator } from '../common';
+import { authMode, mockAuthAllowed } from '../common';
 
 /** Accepts `mock:<profileId>`; `FAIL` and `DOWN` simulate #0-1 Ex1 / Ex2. Never use outside emulators. */
 export class MockSingpassVerifier implements SingpassVerifier {
@@ -39,10 +39,13 @@ class UnconfiguredSingpassVerifier implements SingpassVerifier {
   }
 }
 
-/** Chooses by env AUTH_MODE. The mock refuses to run outside the emulators. */
+/** Chooses by env AUTH_MODE. The mock refuses to run outside the emulators unless ALLOW_MOCK_AUTH=true (hosted demo only). */
 export function createSingpassVerifier(env: NodeJS.ProcessEnv = process.env): SingpassVerifier {
   if (authMode(env) === 'mock') {
-    if (!isEmulator(env)) throw new Error('AUTH_MODE=mock is only allowed in the emulators');
+    if (!mockAuthAllowed(env))
+      throw new Error(
+        'AUTH_MODE=mock is only allowed in the emulators or with ALLOW_MOCK_AUTH=true',
+      );
     return new MockSingpassVerifier();
   }
   return new UnconfiguredSingpassVerifier();

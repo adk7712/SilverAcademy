@@ -1,4 +1,4 @@
-import { authMode, ignoreCheckInWindow, isEmulator, qrSecret } from './config';
+import { authMode, mockAuthAllowed, ignoreCheckInWindow, isEmulator, qrSecret } from './config';
 
 describe('config', () => {
   it('detects emulators', () => {
@@ -12,6 +12,9 @@ describe('config', () => {
     expect(authMode({ AUTH_MODE: 'mock', FUNCTIONS_EMULATOR: 'true' })).toBe('mock');
     expect(() => authMode({ AUTH_MODE: 'mock' })).toThrow(/emulators/); // refused outside emulators
     expect(() => authMode({ AUTH_MODE: 'x' })).toThrow();
+    expect(authMode({ AUTH_MODE: 'mock', ALLOW_MOCK_AUTH: 'true' })).toBe('mock'); // hosted demo opt-in
+    expect(() => authMode({ AUTH_MODE: 'mock', ALLOW_MOCK_AUTH: 'yes' })).toThrow();
+    expect(mockAuthAllowed({})).toBe(false);
   });
   it('QR secret has a dev default only in emulators', () => {
     expect(qrSecret({ FUNCTIONS_EMULATOR: 'true' })).toBe('dev-only-change-me');
