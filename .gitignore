@@ -16,3 +16,6 @@ firebase-debug.log
 ui-debug.log
 *.tsbuildinfo
 functions/lib/
+
+# hosted demo functions env (holds QR secret)
+functions/.env.silveracademy-demo-adk
