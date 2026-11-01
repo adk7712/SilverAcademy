@@ -72,6 +72,15 @@ firebase/        emulator config, firestore and storage rules, indexes, seed, ru
 docs/            coordination and documentation hub
 ```
 
+## Deployment
+
+The web app (`apps/web`, Vite + React) is hosted on Vercel Hobby. Config is in `vercel.json` (repo root).
+
+- Project URL: `https://<your-project>.vercel.app` (placeholder; fill in after the first deploy).
+- Every pull request gets a preview URL automatically, posted as a comment on the PR.
+- Pushes to `master` (the repo's default branch) deploy to production.
+- Only the web app is hosted. The mobile app and Firebase emulators still run locally, so a deployed web app has no backend until real Firebase config is added as Vercel environment variables.
+
 ## Documentation
 
 Start with **[docs/README.md](docs/README.md)**, the documentation index. Then:
