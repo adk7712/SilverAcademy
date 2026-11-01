@@ -19,3 +19,4 @@ functions/lib/
 
 # hosted demo functions env (holds QR secret)
 functions/.env.silveracademy-demo-adk
+.cloud-demo-credentials
