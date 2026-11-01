@@ -184,6 +184,8 @@ Admin can also show **Accounts** (suspend and reactivate need a reason), **Works
 | `npm run test:emulator` | Rules tests and backend emulator integration tests. Starts and stops its own emulators. **Stop `npm run emulators` first** (same ports). | Starts its own |
 | `npm run e2e` | End-to-end run of the core loop against already-running, freshly seeded emulators (`firebase/e2e/run.ts`). Real callable HTTP with Auth emulator tokens, plus rules checks. About 63 checks. | Yes, see section 9 |
 
+CI (`.github/workflows/ci.yml`, Node 24) runs on every PR and push to `master` in two jobs: `test` (lint, format check, typecheck, Jest with the coverage gate, web Vitest) and `emulator` (`npm run test:emulator`, then seed and `npm run e2e` on fresh emulators). Each job writes its test counts, plus coverage for `test`, to the run summary.
+
 Last recorded results (task 3.3, 2026-10-19): typecheck, lint, format check, `npm test` (373 Jest + 113 web), `npm run test:emulator` (137) and `npm run e2e` (63 checks) all passed.
 
 ---
