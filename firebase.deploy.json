@@ -12,5 +12,10 @@
       "codebase": "default",
       "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"]
     }
-  ]
+  ],
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
+  }
 }
