@@ -4,6 +4,9 @@ const base = {
   testEnvironment: 'node',
 };
 module.exports = {
+  // Istanbul coverage (npm run test:coverage); CI fails if it drops below these floors.
+  collectCoverageFrom: ['{packages/shared,functions}/src/**/*.ts', '!**/*.test.ts'],
+  coverageThreshold: { global: { statements: 50, branches: 60, functions: 40, lines: 50 } },
   projects: [
     { ...base, displayName: 'shared', rootDir: 'packages/shared' },
     {

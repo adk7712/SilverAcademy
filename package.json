@@ -14,6 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest && npm run test -w @silveracademy/web",
+    "test:coverage": "jest --coverage",
     "typecheck": "npm run typecheck --workspaces --if-present && tsc -p firebase/seed/tsconfig.json && tsc -p firebase/rules-tests/tsconfig.json && tsc -p firebase/e2e/tsconfig.json",
     "dev:mobile": "npm run start -w @silveracademy/mobile",
     "dev:web": "npm run dev -w @silveracademy/web",
