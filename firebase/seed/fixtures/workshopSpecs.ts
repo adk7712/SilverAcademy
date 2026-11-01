@@ -1,7 +1,8 @@
 // Seed workshop definitions (task 0.5): varied statuses, categories and instructors. Pure data, shared by venues and bookings.
-// Status, slot and request links are declared in venues.ts and bookings.ts. Titles are fictional demo data.
-import type { WorkshopCategory, WorkshopStatus } from '@silveracademy/shared';
+// Status, slot and request links are declared in venues.ts and bookings.ts. Demo titles are fictional; real events come from realEvents.ts.
+import type { RealEventInfo, WorkshopCategory, WorkshopStatus } from '@silveracademy/shared';
 import type { PersonKey } from './accounts';
+import { REAL_WORKSHOP_SPECS } from './realEvents';
 
 export interface WorkshopSpec {
   id: string;
@@ -15,9 +16,10 @@ export interface WorkshopSpec {
   needsVolunteers: boolean;
   volunteerSlots: number;
   cancelReason?: string;
+  realEvent?: RealEventInfo;
 }
 
-export const WORKSHOP_SPECS: readonly WorkshopSpec[] = [
+const DEMO_WORKSHOP_SPECS: readonly WorkshopSpec[] = [
   {
     id: 'ws-01',
     instructor: 'instructorAhmad',
@@ -118,6 +120,8 @@ export const WORKSHOP_SPECS: readonly WorkshopSpec[] = [
     volunteerSlots: 0,
   },
 ];
+
+export const WORKSHOP_SPECS = [...DEMO_WORKSHOP_SPECS, ...REAL_WORKSHOP_SPECS];
 
 export const workshopSpec = (id: string): WorkshopSpec => {
   const spec = WORKSHOP_SPECS.find((w) => w.id === id);
