@@ -4,6 +4,7 @@ import {
   recommendWorkshops,
   sortByDistance,
   sortByStart,
+  isWithinSgBounds,
   type LatLng,
   type Workshop,
   type WorkshopCategory,
@@ -97,3 +98,35 @@ export function computeDiscover(
 
 export const formatDistance = (km: number | null): string | null =>
   km === null ? null : km < 10 ? km.toFixed(1) : String(Math.round(km));
+
+export interface VenuePin<W> {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  workshops: W[];
+}
+
+/** One map pin per venue (several workshops can share a venue); venues missing or outside Singapore are left out. */
+export function venuePins<W extends Pick<Workshop, 'venue'>>(items: readonly W[]): VenuePin<W>[] {
+  const byId = new Map<string, VenuePin<W>>();
+  for (const w of items) {
+    const v = w.venue;
+    if (!v || !isWithinSgBounds(v)) continue;
+    const pin = byId.get(v.facilityId);
+    if (pin) pin.workshops.push(w);
+    else
+      byId.set(v.facilityId, {
+        id: v.facilityId,
+        name: v.name,
+        lat: v.lat,
+        lng: v.lng,
+        workshops: [w],
+      });
+  }
+  return [...byId.values()];
+}
+
+/** Only https links leave the app (the real-event source is shown as a button). */
+export const safeSourceUrl = (url: string | undefined): string | null =>
+  url && /^https:\/\/[^\s]+$/.test(url) ? url : null;

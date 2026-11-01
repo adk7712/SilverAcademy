@@ -1,7 +1,7 @@
-// UC #2-2 BookWorkshops: workshop detail, Book button with confirmation, clear failure messages.
+// UC #2-2 BookWorkshops: workshop detail with venue map, Book button with confirmation, clear failure messages.
 import { useState } from 'react';
-import { View } from 'react-native';
-import { seatsRemaining } from '@silveracademy/shared';
+import { Linking, View } from 'react-native';
+import { isWithinSgBounds, seatsRemaining } from '@silveracademy/shared';
 import {
   AppText,
   Badge,
@@ -18,7 +18,9 @@ import { format, strings } from '../../../../i18n';
 import { formatDateTime, formatRange } from '../../../../services/dateFormat';
 import { useAppNavigation, useAppRoute } from '../../../../navigation';
 import { blockMessage, bookBlockReason } from '../../controller/learnerDetailLogic';
+import { safeSourceUrl } from '../../controller/learnerDiscoverLogic';
 import { useLearnerWorkshopDetail } from '../../controller/useLearnerWorkshopDetail';
+import { WorkshopMap } from './WorkshopMap';
 
 export function WorkshopDetailScreen() {
   const { spacing } = useTheme();
@@ -28,6 +30,7 @@ export function WorkshopDetailScreen() {
   const toast = useToast();
   const d = useLearnerWorkshopDetail(workshopId);
   const [confirming, setConfirming] = useState(false);
+  const [mapFailed, setMapFailed] = useState(false);
 
   const viewTicket = (bookingId: string) =>
     navigation.navigate('MyBookingsTab', { screen: 'Ticket', params: { bookingId } });
@@ -41,6 +44,7 @@ export function WorkshopDetailScreen() {
     const block = bookBlockReason(w, new Date());
     const when = w.startAt && w.endAt ? formatRange(w.startAt.toDate(), w.endAt.toDate()) : '';
     const left = seatsRemaining(w);
+    const sourceUrl = safeSourceUrl(w.realEvent?.sourceUrl);
     const confirmBooking = async () => {
       setConfirming(false);
       if (await d.book()) toast.show(s.bookedToast, 'success');
@@ -48,7 +52,10 @@ export function WorkshopDetailScreen() {
     body = (
       <>
         <AppText variant="heading">{w.title}</AppText>
-        <Badge label={s.categories[w.category]} tone="info" />
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+          <Badge label={s.categories[w.category]} tone="info" />
+          {w.realEvent ? <Badge label={s.realEvent} tone="info" /> : null}
+        </View>
         <Card>
           <AppText variant="bodyStrong">{s.whenTitle}</AppText>
           <AppText>{when}</AppText>
@@ -56,11 +63,38 @@ export function WorkshopDetailScreen() {
           <AppText>{w.venue ? `${w.venue.name}, ${w.venue.address}` : '-'}</AppText>
           <AppText variant="bodyStrong">{s.instructorTitle}</AppText>
           <AppText>{w.instructorName}</AppText>
+          {w.realEvent ? (
+            <>
+              <AppText variant="bodyStrong">{s.organiserTitle}</AppText>
+              <AppText>{w.realEvent.organiser}</AppText>
+            </>
+          ) : null}
           <AppText variant="bodyStrong">{s.capacityTitle}</AppText>
           <AppText>
             {format(s.capacityValue, { taken: w.seatsTaken, capacity: w.capacity, left })}
           </AppText>
         </Card>
+        {w.venue && isWithinSgBounds(w.venue) && !mapFailed ? (
+          <WorkshopMap
+            pins={[{ ...w.venue, id: w.venue.facilityId, label: w.venue.name, text: '' }]}
+            selectedId={w.venue.facilityId}
+            onError={() => setMapFailed(true)}
+          />
+        ) : null}
+        {w.realEvent ? (
+          <Card>
+            <AppText>{s.realEventNote}</AppText>
+            {sourceUrl ? (
+              <Button
+                label={s.sourceButton}
+                variant="secondary"
+                onPress={() =>
+                  Linking.openURL(sourceUrl).catch(() => toast.show(s.linkFailed, 'error'))
+                }
+              />
+            ) : null}
+          </Card>
+        ) : null}
         <Card>
           <AppText variant="bodyStrong">{s.descriptionTitle}</AppText>
           <AppText>{w.description}</AppText>
