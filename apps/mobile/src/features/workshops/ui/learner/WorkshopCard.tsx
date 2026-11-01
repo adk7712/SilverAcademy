@@ -1,4 +1,4 @@
-// UC #2-1 SearchWorkshops: one workshop row with date, venue, seats left and optional distance.
+// UC #2-1 SearchWorkshops: one workshop row with date, venue, seats left, optional distance and a Real event label.
 import { seatsRemaining, type Workshop } from '@silveracademy/shared';
 import { Badge, ListItem } from '../../../../design';
 import { format, strings } from '../../../../i18n';
@@ -23,7 +23,11 @@ export function WorkshopCard({ workshop: w, distanceKm = null, onPress }: Props)
   const s = strings.workshopsLearner;
   const when = w.startAt ? formatDateTime(w.startAt.toDate()) : '';
   const dist = formatDistance(distanceKm);
-  const meta = [w.venue?.name, dist ? format(s.distanceKm, { km: dist }) : null]
+  const meta = [
+    w.realEvent ? s.realEvent : null,
+    w.venue?.name,
+    dist ? format(s.distanceKm, { km: dist }) : null,
+  ]
     .filter(Boolean)
     .join(' - ');
   return (
@@ -33,7 +37,10 @@ export function WorkshopCard({ workshop: w, distanceKm = null, onPress }: Props)
       meta={meta}
       right={<Badge label={seatsText(w)} tone={seatsRemaining(w) === 0 ? 'danger' : 'success'} />}
       onPress={onPress}
-      accessibilityLabel={format(s.cardLabel, { title: w.title, when, seats: seatsText(w) })}
+      accessibilityLabel={
+        format(s.cardLabel, { title: w.title, when, seats: seatsText(w) }) +
+        (w.realEvent ? `, ${s.realEvent}` : '')
+      }
       testID={`workshop-${w.id}`}
     />
   );

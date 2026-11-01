@@ -6,6 +6,7 @@ import {
   isFiltered,
   parseDateInput,
   validateDates,
+  venuePins,
 } from './learnerDiscoverLogic';
 import { bookBlockReason, describeBookFailure } from './learnerDetailLogic';
 import { AppError } from '@silveracademy/shared';
@@ -112,5 +113,21 @@ describe('booking rules', () => {
     const full = describeBookFailure({ details: { code: 'WORKSHOP_FULL' } });
     expect(full.refresh).toBe(true);
     expect(full.message).toMatch(/full/i);
+  });
+});
+
+describe('venuePins', () => {
+  it('groups workshops by venue and skips those without one', () => {
+    const v = (facilityId: string) => ({ facilityId, name: facilityId, lat: 1.3, lng: 103.8 });
+    const pins = venuePins([
+      ws('a', { venue: v('f1') as Workshop['venue'] }),
+      ws('b', { venue: null }),
+      ws('c', { venue: v('f1') as Workshop['venue'] }),
+      ws('d', { venue: v('f2') as Workshop['venue'] }),
+    ]);
+    expect(pins.map((p) => [p.id, p.workshops.map((w) => w.id)])).toEqual([
+      ['f1', ['a', 'c']],
+      ['f2', ['d']],
+    ]);
   });
 });

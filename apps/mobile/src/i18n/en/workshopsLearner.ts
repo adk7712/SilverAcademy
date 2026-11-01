@@ -39,6 +39,14 @@ export const workshopsLearner = {
   full: 'Full',
   cardLabel: '{title}, {when}, {seats}',
   loadFailed: 'Could not load workshops.',
+  viewList: 'List',
+  viewMap: 'Map',
+  mapHint: 'Tap a pin to see the workshops at that place.',
+  mapFailed: 'The map could not load, so workshops are shown as a list.',
+  linkFailed: 'Could not open the link.',
+  mapPinOne: '{venue}, 1 workshop',
+  mapPinMany: '{venue}, {n} workshops',
+  realEvent: 'Real event',
   // Detail
   detailMissing: 'This workshop could not be found.',
   descriptionTitle: 'About this workshop',
@@ -63,4 +71,6 @@ export const workshopsLearner = {
   confirmedTitle: 'Booking confirmed',
   confirmedBody: 'Your ticket code is {code}. Show your ticket at the door.',
   seatsRemaining: '{n} seats remaining.',
+  organiserTitle: 'Organiser',
+  sourceButton: 'View the original listing',
 } as const;

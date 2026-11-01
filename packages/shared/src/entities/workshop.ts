@@ -13,6 +13,12 @@ export interface VenueSnapshot {
   partnerId: string;
 }
 
+/** A real public event listed for the demo (not created in SilverAcademy). */
+export interface RealEventInfo {
+  organiser: string;
+  sourceUrl: string;
+}
+
 export interface Workshop extends Timestamps, Versioned {
   id: string;
   instructorId: string;
@@ -37,6 +43,7 @@ export interface Workshop extends Timestamps, Versioned {
   ratingSum: number;
   ratingCount: number;
   cancelReason?: string;
+  realEvent?: RealEventInfo;
 }
 
 export interface VolunteerAssignment extends Timestamps {

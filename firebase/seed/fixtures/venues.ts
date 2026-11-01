@@ -1,11 +1,12 @@
 // Seed venues (task 0.5): three Community Partner facilities with SG coordinates, slots in mixed statuses, and venue
 // requests. Approved requests lock their slot (BOOKED); the pending request sits on an AVAILABLE slot because requests
-// do not hold slots (architecture.md 4.6). UC #1-3, #4-1, #4-2. Venue names and addresses are fictional demo data.
+// do not hold slots (architecture.md 4.6). UC #1-3, #4-1, #4-2. Demo venue names and addresses are fictional.
 import type { SlotStatus, VenueRequestStatus } from '@silveracademy/shared';
 import { COLLECTIONS, facilityDocId, slotDocId } from '../ids';
 import { MS_PER_HOUR, sgDateTime, toTs } from '../time';
 import { seedDoc, type SeedDoc } from '../types';
 import { PARTNER_ORG_NAME, UID, person } from './accounts';
+import { REAL_FACILITY_SPECS, REAL_REQUEST_SPECS, REAL_SLOT_SPECS } from './realEvents';
 import { workshopSpec } from './workshopSpecs';
 
 export interface FacilitySpec {
@@ -19,7 +20,7 @@ export interface FacilitySpec {
   amenities: string[];
 }
 
-export const FACILITY_SPECS: readonly FacilitySpec[] = [
+const DEMO_FACILITY_SPECS: readonly FacilitySpec[] = [
   {
     key: 'toa-payoh',
     name: 'Demo Hall Toa Payoh',
@@ -52,18 +53,19 @@ export const FACILITY_SPECS: readonly FacilitySpec[] = [
   },
 ];
 
-export interface SlotSpec {
+export const FACILITY_SPECS = [...DEMO_FACILITY_SPECS, ...REAL_FACILITY_SPECS];
+
+export type SlotSpec = {
   key: string;
   facilityKey: string;
-  dayOffset: number;
-  startHour: number;
   durationHours: number;
   status: SlotStatus;
   /** Workshop that holds the slot (only for BOOKED slots). */
   workshopId: string | null;
-}
+  /** Relative to the seed run (demo data), or a fixed instant (real events). */
+} & ({ dayOffset: number; startHour: number } | { startsAt: string });
 
-export const SLOT_SPECS: readonly SlotSpec[] = [
+const DEMO_SLOT_SPECS: readonly SlotSpec[] = [
   {
     key: 'toa-payoh-1',
     facilityKey: 'toa-payoh',
@@ -165,6 +167,8 @@ export const SLOT_SPECS: readonly SlotSpec[] = [
   },
 ];
 
+export const SLOT_SPECS = [...DEMO_SLOT_SPECS, ...REAL_SLOT_SPECS];
+
 export interface RequestSpec {
   id: string;
   workshopId: string;
@@ -172,7 +176,7 @@ export interface RequestSpec {
   status: VenueRequestStatus;
 }
 
-export const REQUEST_SPECS: readonly RequestSpec[] = [
+const DEMO_REQUEST_SPECS: readonly RequestSpec[] = [
   { id: 'vr-01', workshopId: 'ws-04', slotKey: 'toa-payoh-1', status: 'APPROVED' },
   { id: 'vr-02', workshopId: 'ws-01', slotKey: 'toa-payoh-2', status: 'APPROVED' },
   { id: 'vr-03', workshopId: 'ws-02', slotKey: 'bedok-1', status: 'APPROVED' },
@@ -180,6 +184,8 @@ export const REQUEST_SPECS: readonly RequestSpec[] = [
   { id: 'vr-05', workshopId: 'ws-03', slotKey: 'ang-mo-kio-1', status: 'APPROVED' },
   { id: 'vr-06', workshopId: 'ws-07', slotKey: 'ang-mo-kio-3', status: 'PENDING' },
 ];
+
+export const REQUEST_SPECS = [...DEMO_REQUEST_SPECS, ...REAL_REQUEST_SPECS];
 
 export const slotForWorkshop = (workshopId: string): SlotSpec | undefined =>
   SLOT_SPECS.find((s) => s.workshopId === workshopId);
@@ -191,7 +197,8 @@ export const facilityOfSlot = (slot: SlotSpec): FacilitySpec => {
 };
 
 export function slotTimes(slot: SlotSpec, now: Date): { startAt: Date; endAt: Date } {
-  const startAt = sgDateTime(now, slot.dayOffset, slot.startHour);
+  const startAt =
+    'startsAt' in slot ? new Date(slot.startsAt) : sgDateTime(now, slot.dayOffset, slot.startHour);
   return { startAt, endAt: new Date(startAt.getTime() + slot.durationHours * MS_PER_HOUR) };
 }
 

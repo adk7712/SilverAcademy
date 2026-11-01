@@ -97,3 +97,15 @@ export function computeDiscover(
 
 export const formatDistance = (km: number | null): string | null =>
   km === null ? null : km < 10 ? km.toFixed(1) : String(Math.round(km));
+
+/** One map pin per venue (several workshops can share a venue); workshops without a venue are left out. */
+export function venuePins<W extends Pick<Workshop, 'venue'>>(items: readonly W[]) {
+  const byId = new Map<string, NonNullable<W['venue']> & { id: string; workshops: W[] }>();
+  for (const w of items) {
+    if (!w.venue) continue;
+    const pin = byId.get(w.venue.facilityId);
+    if (pin) pin.workshops.push(w);
+    else byId.set(w.venue.facilityId, { ...w.venue, id: w.venue.facilityId, workshops: [w] });
+  }
+  return [...byId.values()];
+}

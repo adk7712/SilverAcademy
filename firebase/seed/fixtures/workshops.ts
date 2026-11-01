@@ -81,6 +81,7 @@ export function buildWorkshopDocs(now: Date, facts: WorkshopFacts): SeedDoc[] {
       ratingSum: ratings.reduce((sum, f) => sum + f.rating, 0),
       ratingCount: ratings.length,
       ...(spec.cancelReason ? { cancelReason: spec.cancelReason } : {}),
+      ...(spec.realEvent ? { realEvent: spec.realEvent } : {}),
       version: WORKSHOP_SEED_VERSION,
       createdAt: stamp,
       updatedAt: stamp,

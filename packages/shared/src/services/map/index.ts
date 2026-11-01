@@ -5,3 +5,4 @@ export * from './StubMapProvider';
 export * from './createMapProvider';
 export * from './fixtures';
 export * from './mapErrors';
+export * from './osmTiles';

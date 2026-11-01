@@ -19,9 +19,9 @@ Read this before you demo the app or change one of the flagged areas. Priority o
 | V7 | Storage uploads | Report attachment upload has not been run end to end with the Storage emulator through the mobile app. | 2.6 |
 | V8 | Location | Location permission flows on device and on web (browser permission, HTTPS or localhost only) are untested. | 2.2, 2.4, 2.6 |
 | V9 | NFR checks | The phase 3 NFR checks are open: scan under 3 s, search under 2 s on seed data, 44 px targets (checked in code only), offline ticket. | `checklists/phase3-quality.md` |
-| V10 | OneMap | The OneMap provider has never been called live. CORS from the browser and token availability are unverified. The stub is the default. | 1.6, 2.8 |
+| V10 | OneMap | The OneMap provider has not been run live from the apps. CORS from the browser and token availability are unverified, and the stub is the default. The public search endpoint was called by hand for the Ayer Rajah CC coordinates (2026-11-01). The learner map uses OpenStreetMap tiles, not OneMap. | 1.6, 2.8, G |
 | V11 | Emulator HTTP path | Emulator tests for the venues, workshops and users modules call the exported handler functions, not the deployed callables over HTTP. The e2e run does use HTTP for the core loop. | 1.5 |
-| V12 | Seeded data after time passes | Seed data is relative to the run time. Seeded windows shift on each reseed; `senior-49-edge` becomes a senior instructor on 2027-06-30 on a reseed. | 0.5 |
+| V12 | Seeded data after time passes | Seed data is relative to the run time. Seeded windows shift on each reseed; `senior-49-edge` becomes a senior instructor on 2027-06-30 on a reseed. The real event `ws-real-01` is the exception: its date is fixed at 21 Nov 2026, so after that date Discover hides it and booking returns `WORKSHOP_STARTED`. | 0.5, G |
 
 ---
 
@@ -30,7 +30,7 @@ Read this before you demo the app or change one of the flagged areas. Priority o
 | # | Area | Limitation | Source |
 |---|------|------------|--------|
 | S1 | Singpass | **Singpass is mocked** (ADR-001). `AUTH_MODE=mock` is the only working mode. `AUTH_MODE=singpass` returns `SINGPASS_UNAVAILABLE`. The mock picker only exists in the emulator. Singpass logins are not audited. | 1.1, dev-guide |
-| S2 | Map | The venue map is a **schematic pin plot** with no tiles (`react-native-maps` or WebView would be needed for OneMap tiles). The web venue form takes numeric coordinates. | 2.3, 2.8 |
+| S2 | Map | Learner Discover (list/map toggle) and workshop detail show an **OpenStreetMap tile map** with venue pins. It is a static view fitted to the pins, with no pan or zoom, and it falls back to the list if every tile fails (a few missing tiles show as blank squares). It is not run on a device yet. The instructor venue picker is still a **schematic pin plot**, and the web venue form takes numeric coordinates. OSM tiles suit a demo, not production traffic (OSM tile usage policy). | 2.3, 2.8, G |
 | S3 | Learner location | "Selected location" by postal code (ADR-018) is not built. Only device location is used for "Nearest". | 2.2 |
 | S4 | Date filter | The Discover date range is a text field (YYYY-MM-DD), not a date picker. No date-picker library is installed. | 2.2 |
 | S5 | Feedback | Feedback (#2-4) is built on mobile with a fixed tag list. Its use case was marked "deferred" in the first `functions.md` draft, and that marking is now stale. | 2.6 |

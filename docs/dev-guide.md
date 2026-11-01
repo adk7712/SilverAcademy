@@ -87,7 +87,7 @@ Singpass is **mocked** (ADR-001). On the mobile login screen pick a profile from
 | `learner-35` | Tan Wei Ming, age 35 | LEARNER | Booked `ws-01` (Smartphone Basics, open) |
 | `senior-49-edge` | Lim Hui Ling, age 49 | LEARNER | Booked `ws-02` (nearly full) and attended `ws-04` (completed, feedback given) |
 | `senior-50` | Ong Siew Hoon, age 50 | LEARNER + SENIOR_INSTRUCTOR | Instructor profile PENDING (review queue) |
-| `senior-62` | Ahmad bin Yusof, age 62 | LEARNER + SENIOR_INSTRUCTOR | Profile APPROVED; teaches `ws-01`, `ws-04`, `ws-05`, `ws-07`; wallet 11 points after one redemption |
+| `senior-62` | Ahmad bin Yusof, age 62 | LEARNER + SENIOR_INSTRUCTOR | Profile APPROVED; teaches `ws-01`, `ws-04`, `ws-05`, `ws-07`, `ws-real-01`; wallet 11 points after one redemption |
 | `senior-72` | Mary Goh Bee Lian, age 72 | LEARNER + SENIOR_INSTRUCTOR | Profile APPROVED; teaches `ws-02`, `ws-03`, `ws-06`, `ws-08`; wallet 30 points |
 | `volunteer-28` | Priya Nair, age 28 | VOLUNTEER | Assigned to `ws-03` (Chair Tai Chi, needs volunteers) |
 
@@ -102,14 +102,15 @@ Staff sign in on the web app with their staff user id and password. Staff are no
 | Login (staff user id) | Email | Role | Notes |
 |---|---|---|---|
 | `admin01` | `admin01@staff.silveracademy.test` | ADMIN | Accounts, workshops, voucher inventory, incident queue, instructor review |
-| `partner01` | `partner01@staff.silveracademy.test` | COMMUNITY_PARTNER | Owns 3 facilities (`Demo Hall Toa Payoh`, `Demo Room Bedok`, `Demo Studio Ang Mo Kio`) and their slots; `ws-07` has a pending venue request |
+| `partner01` | `partner01@staff.silveracademy.test` | COMMUNITY_PARTNER | Owns 4 facilities (`Demo Hall Toa Payoh`, `Demo Room Bedok`, `Demo Studio Ang Mo Kio`, and the real `Ayer Rajah Community Club`) and their slots; `ws-07` has a pending venue request |
 
 Staff passwords are the seed defaults in `firebase/seed/guard.ts`, or the `SEED_*` overrides you set. They are not secrets, but do not reuse them outside the emulator. Staff user ids are case-insensitive (lowercase on the server).
 
 ### Other seeded data
 
-- 8 workshops: `ws-01` to `ws-08`, with statuses OPEN (`ws-01`, `ws-02`, `ws-03`, `ws-05`), COMPLETED (`ws-04`), CANCELLED (`ws-06`), PENDING_VENUE (`ws-07`) and DRAFT (`ws-08`).
-- 3 facilities and 11 slots (AVAILABLE, BOOKED, UNAVAILABLE, MAINTENANCE), and 6 venue requests.
+- 8 demo workshops: `ws-01` to `ws-08`, with statuses OPEN (`ws-01`, `ws-02`, `ws-03`, `ws-05`), COMPLETED (`ws-04`), CANCELLED (`ws-06`), PENDING_VENUE (`ws-07`) and DRAFT (`ws-08`).
+- 1 real event, `ws-real-01` (OPEN): onePA Digital Club @ Ayer Rajah (Singpass), Sat 21 Nov 2026, 10:00 to 12:00, at Ayer Rajah Community Club, 150 Pandan Gardens, Singapore 609335. Its date is fixed, not relative to the seed run. It is taught by `senior-62` for the demo and links to the onePA listing. Source: `firebase/seed/fixtures/realEvents.ts`.
+- 4 facilities and 12 slots (AVAILABLE, BOOKED, UNAVAILABLE, MAINTENANCE), and 7 venue requests (one for the real event).
 - 3 voucher tiers `DEMOVP_5`, `DEMOVP_10`, `DEMOVP_20`, with 20 fictional codes such as `DEMOVP-05-0001`. The inventory is server-only; admins see masked codes.
 - Demo ticket codes for the manual-entry fallback: `K7Q2M9XA` (ws-01, booked by `learner-35`), `R4T8NH3V` (ws-02), `WB5D6JZP` (ws-04, already attended).
 
@@ -125,6 +126,7 @@ Before you start: emulators running, freshly seeded, and `functions/.env.local` 
 
 1. Launch the mobile app (`npm run dev:mobile`). On the login screen, choose `learner-35` (Tan Wei Ming) from the mock picker.
 2. **Discover** lists OPEN workshops. Use the search box, the category select and the date filter. Sort by "Soonest" or "Nearest" (nearest needs location permission; without it the note explains why).
+   - Real event: **Digital Club @ Ayer Rajah** is marked **Real event**. Switch the toggle to **Map**: OpenStreetMap tiles show one pin per venue, including Ayer Rajah CC in the west. Tap the pin to list its workshop, then open it. The detail screen shows the venue on a map, the organiser (onePA) and a **View the original listing** button. If the tiles cannot load, Discover returns to the list with a note.
 3. Open **Smartphone Basics** (`ws-01`) or **Conversational Mandarin Over Tea** (`ws-05`). `learner-35` already holds `ws-01`, so for a clean booking use **`ws-05`**.
 4. Tap **Book Workshop**, then confirm. A success card shows the 8-character ticket code.
 5. Open **My Bookings**, then the booking, to see the **Ticket**: the black-on-white QR, the `XXXX-XXXX` code for manual check-in, the venue, the time and the instructor.
