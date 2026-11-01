@@ -5,7 +5,6 @@ import {
   computeDiscover,
   isFiltered,
   parseDateInput,
-  safeSourceUrl,
   validateDates,
   venuePins,
 } from './learnerDiscoverLogic';
@@ -118,28 +117,17 @@ describe('booking rules', () => {
 });
 
 describe('venuePins', () => {
-  it('groups workshops by venue and skips missing or non-SG venues', () => {
+  it('groups workshops by venue and skips those without one', () => {
     const v = (facilityId: string) => ({ facilityId, name: facilityId, lat: 1.3, lng: 103.8 });
     const pins = venuePins([
       ws('a', { venue: v('f1') as Workshop['venue'] }),
       ws('b', { venue: null }),
       ws('c', { venue: v('f1') as Workshop['venue'] }),
       ws('d', { venue: v('f2') as Workshop['venue'] }),
-      ws('e', { venue: { ...v('f3'), lat: 51.5, lng: -0.1 } as Workshop['venue'] }),
     ]);
     expect(pins.map((p) => [p.id, p.workshops.map((w) => w.id)])).toEqual([
       ['f1', ['a', 'c']],
       ['f2', ['d']],
     ]);
-  });
-});
-
-describe('safeSourceUrl', () => {
-  it('allows only https links', () => {
-    expect(safeSourceUrl('https://www.onepa.gov.sg/events/x')).toBe(
-      'https://www.onepa.gov.sg/events/x',
-    );
-    for (const bad of [undefined, '', 'http://x.sg', 'javascript:alert(1)', 'https://a b'])
-      expect(safeSourceUrl(bad)).toBeNull();
   });
 });

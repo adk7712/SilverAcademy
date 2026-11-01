@@ -34,7 +34,7 @@ export function DiscoverScreen() {
   const open = (workshopId: string) => navigation.navigate('WorkshopDetail', { workshopId });
   const ready = !d.loading && !d.error;
   const pins = venuePins(d.results);
-  // List view is the fallback when the map fails or nothing has a venue (ADR-003).
+  // List view is the fallback when the map fails (ADR-003).
   const showMap = view === 'MAP' && !mapFailed && pins.length > 0;
   const selected = pins.find((p) => p.id === venueId);
 
@@ -50,14 +50,14 @@ export function DiscoverScreen() {
         testID="discover-search"
       />
       <Segmented
-        value={view === 'MAP' && !mapFailed ? 'MAP' : 'LIST'}
+        value={showMap ? 'MAP' : 'LIST'}
         onChange={(v: DiscoverView) => {
           setView(v);
           if (v === 'MAP') setMapFailed(false);
         }}
         options={[
-          { value: 'LIST', label: s.viewList, accessibilityLabel: `${s.viewLabel} ${s.viewList}` },
-          { value: 'MAP', label: s.viewMap, accessibilityLabel: `${s.viewLabel} ${s.viewMap}` },
+          { value: 'LIST', label: s.viewList },
+          { value: 'MAP', label: s.viewMap },
         ]}
         testID="discover-view"
       />
@@ -90,23 +90,18 @@ export function DiscoverScreen() {
       {ready && view === 'MAP' && mapFailed ? (
         <AppText color="textMuted">{s.mapFailed}</AppText>
       ) : null}
-      {ready && view === 'MAP' && !mapFailed && pins.length === 0 && d.results.length > 0 ? (
-        <AppText color="textMuted">{s.mapNoPlaces}</AppText>
-      ) : null}
       {ready && showMap ? (
         <View style={{ gap: spacing.smd }}>
           <WorkshopMap
             pins={pins.map((p) => ({
-              id: p.id,
-              lat: p.lat,
-              lng: p.lng,
+              ...p,
               text: String(p.workshops.length),
               label: format(p.workshops.length === 1 ? s.mapPinOne : s.mapPinMany, {
                 venue: p.name,
                 n: p.workshops.length,
               }),
             }))}
-            selectedId={selected?.id ?? null}
+            selectedId={venueId ?? undefined}
             onSelect={setVenueId}
             onError={() => setMapFailed(true)}
           />

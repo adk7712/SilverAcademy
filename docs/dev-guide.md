@@ -126,7 +126,7 @@ Before you start: emulators running, freshly seeded, and `functions/.env.local` 
 
 1. Launch the mobile app (`npm run dev:mobile`). On the login screen, choose `learner-35` (Tan Wei Ming) from the mock picker.
 2. **Discover** lists OPEN workshops. Use the search box, the category select and the date filter. Sort by "Soonest" or "Nearest" (nearest needs location permission; without it the note explains why).
-   - Real event: **Digital Club @ Ayer Rajah** carries a **Real event** badge. Switch the toggle to **Map**: OpenStreetMap tiles show one pin per venue, including Ayer Rajah CC in the west. Tap the pin to list its workshop, then open it. The detail screen shows the venue on a map, the organiser (onePA) and a **View the original listing** button. If the tiles cannot load, Discover returns to the list with a note.
+   - Real event: **Digital Club @ Ayer Rajah** is marked **Real event**. Switch the toggle to **Map**: OpenStreetMap tiles show one pin per venue, including Ayer Rajah CC in the west. Tap the pin to list its workshop, then open it. The detail screen shows the venue on a map, the organiser (onePA) and a **View the original listing** button. If the tiles cannot load, Discover returns to the list with a note.
 3. Open **Smartphone Basics** (`ws-01`) or **Conversational Mandarin Over Tea** (`ws-05`). `learner-35` already holds `ws-01`, so for a clean booking use **`ws-05`**.
 4. Tap **Book Workshop**, then confirm. A success card shows the 8-character ticket code.
 5. Open **My Bookings**, then the booking, to see the **Ticket**: the black-on-white QR, the `XXXX-XXXX` code for manual check-in, the venue, the time and the instructor.

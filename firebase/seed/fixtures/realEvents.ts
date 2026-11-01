@@ -1,6 +1,5 @@
-// Seed real events (workstream G, issue #2): public onePA listings at their real venues, kept apart from the fictional
-// demo data. Each real event is an OPEN workshop on a BOOKED slot with an APPROVED venue request, so every existing flow
-// works. Taught by a seed instructor for demo purposes; capacity is a demo value (onePA does not publish it).
+// Seed real events (issue #2): public onePA listings at their real venues, kept apart from the fictional demo data.
+// Each is OPEN on a BOOKED slot with an APPROVED request; instructor, capacities and amenities are demo values.
 import type { FacilitySpec, RequestSpec, SlotSpec } from './venues';
 import type { WorkshopSpec } from './workshopSpecs';
 
@@ -13,7 +12,6 @@ export const REAL_FACILITY_SPECS: readonly FacilitySpec[] = [
     // OneMap search for 609335.
     lat: 1.32096,
     lng: 103.7477,
-    // Demo values: the CC's real capacity and amenities are not published here.
     capacity: 30,
     amenities: ['Wheelchair access', 'Air-conditioned'],
   },

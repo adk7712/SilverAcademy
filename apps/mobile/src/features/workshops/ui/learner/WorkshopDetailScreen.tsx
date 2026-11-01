@@ -1,7 +1,7 @@
 // UC #2-2 BookWorkshops: workshop detail with venue map, Book button with confirmation, clear failure messages.
 import { useState } from 'react';
 import { Linking, View } from 'react-native';
-import { isWithinSgBounds, seatsRemaining } from '@silveracademy/shared';
+import { seatsRemaining } from '@silveracademy/shared';
 import {
   AppText,
   Badge,
@@ -18,7 +18,6 @@ import { format, strings } from '../../../../i18n';
 import { formatDateTime, formatRange } from '../../../../services/dateFormat';
 import { useAppNavigation, useAppRoute } from '../../../../navigation';
 import { blockMessage, bookBlockReason } from '../../controller/learnerDetailLogic';
-import { safeSourceUrl } from '../../controller/learnerDiscoverLogic';
 import { useLearnerWorkshopDetail } from '../../controller/useLearnerWorkshopDetail';
 import { WorkshopMap } from './WorkshopMap';
 
@@ -44,7 +43,6 @@ export function WorkshopDetailScreen() {
     const block = bookBlockReason(w, new Date());
     const when = w.startAt && w.endAt ? formatRange(w.startAt.toDate(), w.endAt.toDate()) : '';
     const left = seatsRemaining(w);
-    const sourceUrl = safeSourceUrl(w.realEvent?.sourceUrl);
     const confirmBooking = async () => {
       setConfirming(false);
       if (await d.book()) toast.show(s.bookedToast, 'success');
@@ -67,6 +65,15 @@ export function WorkshopDetailScreen() {
             <>
               <AppText variant="bodyStrong">{s.organiserTitle}</AppText>
               <AppText>{w.realEvent.organiser}</AppText>
+              <Button
+                label={s.sourceButton}
+                variant="secondary"
+                onPress={() =>
+                  Linking.openURL(w.realEvent!.sourceUrl).catch(() =>
+                    toast.show(s.linkFailed, 'error'),
+                  )
+                }
+              />
             </>
           ) : null}
           <AppText variant="bodyStrong">{s.capacityTitle}</AppText>
@@ -74,26 +81,12 @@ export function WorkshopDetailScreen() {
             {format(s.capacityValue, { taken: w.seatsTaken, capacity: w.capacity, left })}
           </AppText>
         </Card>
-        {w.venue && isWithinSgBounds(w.venue) && !mapFailed ? (
+        {w.venue && !mapFailed ? (
           <WorkshopMap
-            pins={[{ ...w.venue, id: w.venue.facilityId, label: w.venue.name, text: '' }]}
+            pins={[{ ...w.venue, id: w.venue.facilityId, label: w.venue.name }]}
             selectedId={w.venue.facilityId}
             onError={() => setMapFailed(true)}
           />
-        ) : null}
-        {w.realEvent ? (
-          <Card>
-            <AppText>{s.realEventNote}</AppText>
-            {sourceUrl ? (
-              <Button
-                label={s.sourceButton}
-                variant="secondary"
-                onPress={() =>
-                  Linking.openURL(sourceUrl).catch(() => toast.show(s.linkFailed, 'error'))
-                }
-              />
-            ) : null}
-          </Card>
         ) : null}
         <Card>
           <AppText variant="bodyStrong">{s.descriptionTitle}</AppText>
