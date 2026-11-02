@@ -75,5 +75,6 @@ Note 2026-10-19: 4.2 mobile sweep fixes done; see `handoffs/4.2-mobile-fixes.md`
 - 4.3 backend sweep fixes done: see docs/handoffs/4.3-backend-fixes.md (not committed).
 
 - 2026-11-01 G real events and real map (issue #2): Ayer Rajah real event in the seed, OSM map on Discover and workshop detail. See docs/handoffs/G-real-events-map.md.
+- 2026-11-02 H hosted demo: Vercel projects for web and mobile, real Firebase project `silveracademy-demo-adk` (functions, rules, Auth, seed), opt-in mock auth, staff-login fix for the cloud. Links and steps in `hosted-demo.md`; see `handoffs/H-hosted-demo.md`, ADR-026 and ADR-027. PRs: #10 (README URL, merged 2026-11-06), #11 (hosted backend and mobile Vercel config).
 - 2026-11-04 G second real event: Christmas @ Changi Simei 2026 (12 Dec 2026) in the seed.
 - 2026-11-04 F fake Singpass login (issue #1): Singpass-style fake login on mobile, `suspended-demo` seed profile. Code and docs done on `feat/fake-singpass`, verified on Expo mobile web against emulators; native devices not run (owner to check on a phone). See docs/handoffs/F-fake-singpass.md.

@@ -4,15 +4,16 @@ Start here: the root `README.md` (overview and quick start), then `dev-guide.md`
 
 | File | Purpose |
 |------|---------|
-| `../README.md` | Project overview, quick start, tests, repo layout |
+| `../README.md` | Project overview, quick start, hosted demo links, tests |
 | `dev-guide.md` | Setup, demo accounts, demo script for the PDF flows, gotchas, troubleshooting, onboarding |
+| `hosted-demo.md` | Hosted demo: Vercel and Firebase links, environment variables, redeploy and reseed steps, smoke test |
 | `progress.md` | Task status board (owner model, status, date, handoff). Note the 2.x task-ID split between mobile and web |
 | `assignments.md` | Work split by person and workstream, from `next-steps.md`, `known-limitations.md` and the TA's two new items |
 | `known-limitations.md` | Open issues, deferred items, unverified areas and accepted risks, consolidated from handoffs and the review |
 | `next-steps.md` | Prioritised list (P1, P2, P3) for the next developer |
 | `requirements-map.md` | Use case -> module -> screen -> data, NFR map, spec ambiguities |
 | `architecture.md` | Layers, data model, transaction designs, service interfaces |
-| `decisions.md` | ADR log (ADR-001 to ADR-025) |
+| `decisions.md` | ADR log (ADR-001 to ADR-027) |
 | `review-findings.md` | Task 3.2 review of concurrency, atomicity, RBAC and layering, with per-finding status |
 | `api/README.md` | Cloud Function and module API notes |
 | `api/functions.md` | Callable function catalogue (source of truth for names, inputs, outputs, errors) |
