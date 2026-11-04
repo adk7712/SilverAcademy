@@ -1,0 +1,6 @@
+{
+  "installCommand": "cd ../.. && npm ci",
+  "buildCommand": "npx expo export -p web",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
