@@ -13,6 +13,8 @@ interface ScreenProps {
   /** False for screens that manage their own scrolling (lists, camera). Default true. */
   scroll?: boolean;
   headerRight?: ReactNode;
+  /** Pinned under the header, outside the scroll area, so it never scrolls away (e.g. the demo banner). */
+  banner?: ReactNode;
   /** Override the automatic back behaviour. */
   onBack?: () => void;
   testID?: string;
@@ -23,6 +25,7 @@ export function Screen({
   children,
   scroll = true,
   headerRight,
+  banner,
   onBack,
   testID,
 }: ScreenProps) {
@@ -40,6 +43,9 @@ export function Screen({
       testID={testID}
     >
       <Header title={title} onBack={back} right={headerRight} />
+      {banner ? (
+        <View style={{ paddingHorizontal: spacing.md, paddingTop: spacing.sm }}>{banner}</View>
+      ) : null}
       {scroll ? (
         <ScrollView contentContainerStyle={bodyStyle} keyboardShouldPersistTaps="handled">
           {children}

@@ -4,6 +4,8 @@ import type { MockSingpassProfile } from '../services/AuthProvider';
 /** Special profile ids that simulate IdP failures (#0-1 Ex1, Ex2). */
 export const MOCK_FAIL_PROFILE_ID = 'FAIL'; // -> SINGPASS_AUTH_FAILED
 export const MOCK_DOWN_PROFILE_ID = 'DOWN'; // -> SINGPASS_UNAVAILABLE
+/** Seeded with status SUSPENDED, so the real backend path answers ACCOUNT_SUSPENDED (#0-1 suspended account). */
+export const MOCK_SUSPENDED_PROFILE_ID = 'suspended-demo';
 export const MOCK_ASSERTION_PREFIX = 'mock:';
 
 export const MOCK_SINGPASS_PROFILES: readonly MockSingpassProfile[] = [
@@ -54,6 +56,14 @@ export const MOCK_SINGPASS_PROFILES: readonly MockSingpassProfile[] = [
     dateOfBirth: '1998-07-18',
     label: 'Volunteer, age 28',
     suggestedRegisterAs: 'VOLUNTEER',
+  },
+  {
+    profileId: MOCK_SUSPENDED_PROFILE_ID,
+    sub: 'S-MOCK-SUSPENDED',
+    name: 'Koh Beng Huat',
+    dateOfBirth: '1968-04-12',
+    label: 'Suspended account (demo)',
+    suggestedRegisterAs: 'LEARNER',
   },
 ];
 

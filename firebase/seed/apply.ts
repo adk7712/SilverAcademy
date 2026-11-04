@@ -20,7 +20,7 @@ const errorCode = (err: unknown): string =>
 async function upsertAuthUser(auth: Auth, spec: AuthUserSpec): Promise<void> {
   const props: AuthProps = {
     displayName: spec.displayName,
-    disabled: false,
+    disabled: spec.status === 'SUSPENDED', // same as a real suspension (accountAuthRepo)
     ...(spec.email ? { email: spec.email, emailVerified: true } : {}),
     ...(spec.password ? { password: spec.password } : {}),
   };
@@ -30,7 +30,7 @@ async function upsertAuthUser(auth: Auth, spec: AuthUserSpec): Promise<void> {
     if (errorCode(err) !== AUTH_USER_NOT_FOUND) throw err;
     await auth.createUser({ uid: spec.uid, ...props });
   }
-  await auth.setCustomUserClaims(spec.uid, { roles: spec.roles, status: 'ACTIVE' });
+  await auth.setCustomUserClaims(spec.uid, { roles: spec.roles, status: spec.status ?? 'ACTIVE' });
 }
 
 export async function applyAuthUsers(auth: Auth, users: AuthUserSpec[]): Promise<void> {

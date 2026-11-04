@@ -39,7 +39,7 @@ Copy the values from `.env.example` into `functions/.env.local` and `apps/mobile
 
 ## Demo accounts
 
-Mobile users sign in through the mock Singpass picker (for example `learner-35`, `senior-62`, `volunteer-28`). Staff sign in on the web app (`admin01`, `partner01`). The full table of profiles, seeded data and the demo script for the two PDF flows (Learner Booking Journey and Senior Instructor Check-In Flow), Partner approval and Admin voucher upload are in `docs/dev-guide.md`, sections 5 and 6.
+Mobile users sign in through a fake Singpass screen: tap **Log in with Singpass**, then a demo account (for example `learner-35`, `senior-62`, `volunteer-28`). Staff sign in on the web app (`admin01`, `partner01`). The full table of profiles, seeded data and the demo script for the two PDF flows (Learner Booking Journey and Senior Instructor Check-In Flow), Partner approval and Admin voucher upload are in `docs/dev-guide.md`, sections 5 and 6.
 
 ## Tests
 

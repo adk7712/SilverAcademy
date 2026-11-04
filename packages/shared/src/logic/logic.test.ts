@@ -70,6 +70,7 @@ describe('age', () => {
     expect(elig('senior-62')).toBe(true);
     expect(elig('senior-72')).toBe(true);
     expect(elig('volunteer-28')).toBe(false);
+    expect(elig('suspended-demo')).toBe(true);
     expect(
       ageInYears(
         MOCK_SINGPASS_PROFILES.find((p) => p.profileId === 'senior-72')?.dateOfBirth ?? '',

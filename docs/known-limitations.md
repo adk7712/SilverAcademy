@@ -22,6 +22,7 @@ Read this before you demo the app or change one of the flagged areas. Priority o
 | V10 | OneMap | The OneMap provider has not been run live from the apps. CORS from the browser and token availability are unverified, and the stub is the default. The public search endpoint was called by hand for the Ayer Rajah CC coordinates (2026-11-01). The learner map uses OpenStreetMap tiles, not OneMap. | 1.6, 2.8, G |
 | V11 | Emulator HTTP path | Emulator tests for the venues, workshops and users modules call the exported handler functions, not the deployed callables over HTTP. The e2e run does use HTTP for the core loop. | 1.5 |
 | V12 | Seeded data after time passes | Seed data is relative to the run time. Seeded windows shift on each reseed; `senior-49-edge` becomes a senior instructor on 2027-06-30 on a reseed. The real events are the exception: their dates are fixed (`ws-real-01` 21 Nov 2026, `ws-real-02` 12 Dec 2026), so after those dates Discover hides them and booking returns `WORKSHOP_STARTED`. | 0.5, G |
+| V13 | Fake Singpass screen layout | The layout of `FakeSingpassScreen` (both tabs, the approval step, Demo tools) has not been checked on a physical device. | F |
 
 ---
 
@@ -29,7 +30,7 @@ Read this before you demo the app or change one of the flagged areas. Priority o
 
 | # | Area | Limitation | Source |
 |---|------|------------|--------|
-| S1 | Singpass | **Singpass is mocked** (ADR-001). `AUTH_MODE=mock` is the only working mode. `AUTH_MODE=singpass` returns `SINGPASS_UNAVAILABLE`. The mock picker only exists in the emulator. Singpass logins are not audited. | 1.1, dev-guide |
+| S1 | Singpass | **Singpass is mocked** (ADR-001). `AUTH_MODE=mock` is the only working mode. `AUTH_MODE=singpass` returns `SINGPASS_UNAVAILABLE`. The fake Singpass screen is a UI demo; the mock verifier only runs in the emulator. Singpass logins are not audited. | 1.1, dev-guide, F |
 | S2 | Map | Learner Discover (list/map toggle) and workshop detail show an **OpenStreetMap tile map** with venue pins. It is a static view fitted to the pins, with no pan or zoom, and it falls back to the list if every tile fails (a few missing tiles show as blank squares). It is not run on a device yet. The instructor venue picker is still a **schematic pin plot**, and the web venue form takes numeric coordinates. OSM tiles suit a demo, not production traffic (OSM tile usage policy). | 2.3, 2.8, G |
 | S3 | Learner location | "Selected location" by postal code (ADR-018) is not built. Only device location is used for "Nearest". | 2.2 |
 | S4 | Date filter | The Discover date range is a text field (YYYY-MM-DD), not a date picker. No date-picker library is installed. | 2.2 |
@@ -44,6 +45,7 @@ Read this before you demo the app or change one of the flagged areas. Priority o
 | S13 | Ticket and voucher display | Vouchers are shown as large text only; there is no barcode library. Wallet tier selection is visual only. | 2.5 |
 | S14 | Mode switching | A user with VOLUNTEER plus LEARNER only sees the Learner shell; the server never produces that combination. Text size is local only (not synced to `prefs.fontScale`). | 2.1 |
 | S15 | Icons and copy | No icon set is installed; tab bars are text labels. Copy is English only, in `strings/` and `i18n/en/`. Task 2.11 covers polish. | 2.1, 2.11 |
+| S16 | Fake Singpass password | The password field is cosmetic. It must be non-empty, but it is never checked, stored, sent or logged. There is no real Singpass check to test. | F |
 
 ---
 
@@ -145,3 +147,9 @@ H1 (roster no longer returns ticket codes), H2 (offline claims fallback), M1 (id
 - **e2e is not repeatable on a dirty emulator.** Restart and reseed before `npm run e2e`.
 - **Do not show the mockup extras (S11) as features.**
 - **Ticket codes shown in the demo are fictional.** Real Singpass data never appears.
+- **Suspended demo before a reseed.** Without the seeded SUSPENDED doc, `suspended-demo` still answers `ACCOUNT_SUSPENDED`: the mock-mode server guard refuses it and never registers it (it needs the new functions build; a build from before this branch does not know the identity and rejects `suspended-demo` with `SINGPASS_AUTH_FAILED`, so a mobile build with the new screen against old functions shows a failed login for it. With the guard, no ACTIVE `suspended-demo` account can be created). The seeded doc, disabled Auth user and SUSPENDED claim only appear after a reseed. A hosted project has not been reseeded yet.
+- **Hosted rollout order for the fake Singpass login.** Merge the opt-in branch (PR #11), deploy functions, reseed, then ship mobile web. Not done yet. The reseed overwrites live demo data: `firebase/seed/apply.ts` does a full-document `set()` on fixed IDs and resets seeded Auth users (password, claims, disabled flag) in place, so any edits to seeded users, workshops, bookings, wallets or vouchers on the hosted project are lost.
+- **Reactivating `suspended-demo` sticks until the next reseed.** An admin can reactivate it (Accounts page). After that the simulation logs in as a normal Learner + Senior Instructor, so the "suspended" demo no longer shows the error. A reseed puts it back to SUSPENDED.
+- **Leaving during the server call.** Back and Android back stay available while the server exchange runs (so a hung call cannot trap the user) and are hidden only once the token sign-in has started. A stale attempt never signs in. But leaving cannot recall an exchange already sent: the server may still create the user doc (first login) or refresh roles. The device just ignores the result.
+- **Session never loads after sign-in.** If hydration does not finish within `SESSION_HYDRATE_FALLBACK_MS`, the app signs out of Firebase and shows the generic "Something went wrong" error, so retrying the same account hydrates again. Only the fixed 15 second timer decides this; a session that loads later than that is lost and the user logs in again.
+- **`npm run e2e` exits 0 with no emulators running.** Every section then prints "fetch failed" and the process still ends with exit code 0. Its result only counts if the checks actually ran: look for `ok` lines and a non-zero passed count. The script was not changed.
