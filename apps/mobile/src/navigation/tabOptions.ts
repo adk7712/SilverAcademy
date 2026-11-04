@@ -4,13 +4,25 @@ import type { Theme } from '../design';
 
 export function tabScreenOptions(theme: Theme): BottomTabNavigationOptions {
   const label = theme.text('caption');
+
   return {
     headerShown: false,
     tabBarActiveTintColor: theme.colors.primary,
     tabBarInactiveTintColor: theme.colors.textMuted,
-    tabBarLabelStyle: { fontSize: label.fontSize, fontWeight: '700' },
-    tabBarIconStyle: { display: 'none' },
-    tabBarStyle: { minHeight: theme.sizes.minTouchTarget + theme.spacing.lg },
-    tabBarItemStyle: { minHeight: theme.sizes.minTouchTarget, justifyContent: 'center' },
+
+    tabBarLabelPosition: 'below-icon',
+    tabBarLabelStyle: {
+      fontSize: label.fontSize,
+      fontWeight: '700',
+    },
+
+    tabBarStyle: {
+      minHeight: theme.sizes.minTouchTarget + theme.spacing.lg,
+    },
+
+    tabBarItemStyle: {
+      minHeight: theme.sizes.minTouchTarget,
+      justifyContent: 'center',
+    },
   };
 }

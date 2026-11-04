@@ -1,5 +1,6 @@
 // Instructor shell tabs: Dashboard (direct access to Create Workshop, Scan Attendance, Wallet), Report, Profile.
 import { useMemo } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from '../design';
 import { strings } from '../i18n';
@@ -31,21 +32,38 @@ export function InstructorTabs() {
   const options = useMemo(() => tabScreenOptions(theme), [theme]);
   return (
     <Tab.Navigator screenOptions={options}>
-      <Tab.Screen
-        name="DashboardTab"
-        component={DashboardStack}
-        options={{ title: strings.nav.tabs.dashboard }}
-      />
-      <Tab.Screen
-        name="ReportTab"
-        component={ReportStack}
-        options={{ title: strings.nav.tabs.report }}
-      />
-      <Tab.Screen
-        name="ProfileTab"
-        component={ProfileStack}
-        options={{ title: strings.nav.tabs.profile }}
-      />
-    </Tab.Navigator>
+  <Tab.Screen
+    name="DashboardTab"
+    component={DashboardStack}
+    options={{
+      title: strings.nav.tabs.dashboard,
+      tabBarIcon: ({ color, size }) => (
+        <Ionicons name="grid-outline" size={size} color={color} />
+      ),
+    }}
+  />
+
+  <Tab.Screen
+    name="ReportTab"
+    component={ReportStack}
+    options={{
+      title: strings.nav.tabs.report,
+      tabBarIcon: ({ color, size }) => (
+        <Ionicons name="alert-circle-outline" size={size} color={color} />
+      ),
+    }}
+  />
+
+  <Tab.Screen
+    name="ProfileTab"
+    component={ProfileStack}
+    options={{
+      title: strings.nav.tabs.profile,
+      tabBarIcon: ({ color, size }) => (
+        <Ionicons name="person-outline" size={size} color={color} />
+      ),
+    }}
+  />
+</Tab.Navigator>
   );
 }
