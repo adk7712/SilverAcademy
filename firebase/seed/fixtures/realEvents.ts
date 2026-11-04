@@ -15,6 +15,17 @@ export const REAL_FACILITY_SPECS: readonly FacilitySpec[] = [
     capacity: 30,
     amenities: ['Wheelchair access', 'Air-conditioned'],
   },
+  {
+    key: 'changi-simei-cc',
+    name: 'Changi Simei Community Club',
+    address: '10 Simei Street 2, Singapore 529915',
+    postalCode: '529915',
+    // OneMap search for 529915.
+    lat: 1.34497,
+    lng: 103.95517,
+    capacity: 40,
+    amenities: ['Wheelchair access', 'Lift access'],
+  },
 ];
 
 export const REAL_SLOT_SPECS: readonly SlotSpec[] = [
@@ -27,10 +38,19 @@ export const REAL_SLOT_SPECS: readonly SlotSpec[] = [
     status: 'BOOKED',
     workshopId: 'ws-real-01',
   },
+  {
+    key: 'changi-simei-cc-1',
+    facilityKey: 'changi-simei-cc',
+    startsAt: '2026-12-12T14:00:00+08:00',
+    durationHours: 2.5,
+    status: 'BOOKED',
+    workshopId: 'ws-real-02',
+  },
 ];
 
 export const REAL_REQUEST_SPECS: readonly RequestSpec[] = [
   { id: 'vr-real-01', workshopId: 'ws-real-01', slotKey: 'ayer-rajah-cc-1', status: 'APPROVED' },
+  { id: 'vr-real-02', workshopId: 'ws-real-02', slotKey: 'changi-simei-cc-1', status: 'APPROVED' },
 ];
 
 export const REAL_WORKSHOP_SPECS: readonly WorkshopSpec[] = [
@@ -51,6 +71,26 @@ export const REAL_WORKSHOP_SPECS: readonly WorkshopSpec[] = [
       organiser: "onePA (People's Association)",
       sourceUrl:
         'https://www.onepa.gov.sg/events/digital-club-ayer-rajah-singpass-21112026-24283405',
+    },
+  },
+  {
+    id: 'ws-real-02',
+    instructor: 'instructorMary',
+    title: "Christmas @ Changi Simei 2026 - Let's Jingle & Mingle",
+    description:
+      'Celebrate Christmas with a snow party, carnival games, a bouncy castle, snack and handicraft booths, and live ' +
+      'performances at the Level 2 MPH and Civic Plaza. Organised by Changi Simei CC. Tickets are $3 per person ' +
+      'with a door gift, bought through onePA; priority for Changi Simei residents.',
+    category: 'OTHER',
+    capacity: 30,
+    materials: 'Show the ticket QR code from your email at the registration desk.',
+    status: 'OPEN',
+    needsVolunteers: false,
+    volunteerSlots: 0,
+    realEvent: {
+      organiser: 'Changi Simei CC',
+      sourceUrl:
+        'https://www.onepa.gov.sg/events/christmas-changi-simei-2026-let-s-jingle-mingle-e23617380',
     },
   },
 ];

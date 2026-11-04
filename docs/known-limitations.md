@@ -21,7 +21,7 @@ Read this before you demo the app or change one of the flagged areas. Priority o
 | V9 | NFR checks | The phase 3 NFR checks are open: scan under 3 s, search under 2 s on seed data, 44 px targets (checked in code only), offline ticket. | `checklists/phase3-quality.md` |
 | V10 | OneMap | The OneMap provider has not been run live from the apps. CORS from the browser and token availability are unverified, and the stub is the default. The public search endpoint was called by hand for the Ayer Rajah CC coordinates (2026-11-01). The learner map uses OpenStreetMap tiles, not OneMap. | 1.6, 2.8, G |
 | V11 | Emulator HTTP path | Emulator tests for the venues, workshops and users modules call the exported handler functions, not the deployed callables over HTTP. The e2e run does use HTTP for the core loop. | 1.5 |
-| V12 | Seeded data after time passes | Seed data is relative to the run time. Seeded windows shift on each reseed; `senior-49-edge` becomes a senior instructor on 2027-06-30 on a reseed. The real event `ws-real-01` is the exception: its date is fixed at 21 Nov 2026, so after that date Discover hides it and booking returns `WORKSHOP_STARTED`. | 0.5, G |
+| V12 | Seeded data after time passes | Seed data is relative to the run time. Seeded windows shift on each reseed; `senior-49-edge` becomes a senior instructor on 2027-06-30 on a reseed. The real events are the exception: their dates are fixed (`ws-real-01` 21 Nov 2026, `ws-real-02` 12 Dec 2026), so after those dates Discover hides them and booking returns `WORKSHOP_STARTED`. | 0.5, G |
 
 ---
 
