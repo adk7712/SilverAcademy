@@ -11,7 +11,7 @@ import { bad, ok } from './schemaTestHelpers';
 
 describe('registry', () => {
   it('has every functions.md callable with input and output schemas', () => {
-    expect(CALLABLE_NAMES).toHaveLength(33);
+    expect(CALLABLE_NAMES).toHaveLength(34);
     for (const n of CALLABLE_NAMES) {
       expect(CALLABLES[n].input).toBeDefined();
       expect(CALLABLES[n].output).toBeDefined();
@@ -69,6 +69,14 @@ describe('users', () => {
 });
 
 describe('bookings and attendance', () => {
+  it('cancelBooking accepts only a workshop id and returns a cancelled ticket', () => {
+    ok(b.cancelBookingInput, { workshopId: 'w' });
+    bad(b.cancelBookingInput, {});
+    bad(b.cancelBookingInput, { workshopId: '' });
+    bad(b.cancelBookingInput, { workshopId: 'w', learnerId: 'other' });
+    ok(b.cancelBookingOutput, { bookingId: 'w_u', status: 'CANCELLED' });
+    bad(b.cancelBookingOutput, { bookingId: 'w_u', status: 'CONFIRMED' });
+  });
   it('bookWorkshop input', () => {
     ok(b.bookWorkshopInput, { workshopId: 'w' });
     bad(b.bookWorkshopInput, {});

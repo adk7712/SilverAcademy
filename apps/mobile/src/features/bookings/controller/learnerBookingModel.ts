@@ -99,3 +99,12 @@ export function groupBookings(views: readonly BookingView[], now: Date) {
 
 /** QR and code are only meaningful for a live booking. */
 export const isTicketValid = (b: Pick<BookingView, 'status'>) => b.status !== 'CANCELLED';
+
+/** The server rechecks the live workshop schedule before committing. */
+export const canCancelBooking = (b: Pick<BookingView, 'status' | 'startAt'>, now: Date) =>
+  b.status === 'CONFIRMED' && b.startAt.getTime() > now.getTime();
+
+export const markBookingCancelled = (
+  views: readonly BookingView[],
+  bookingId: string,
+): BookingView[] => views.map((b) => (b.id === bookingId ? { ...b, status: 'CANCELLED' } : b));
