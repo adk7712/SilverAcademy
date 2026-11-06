@@ -11,7 +11,7 @@ Note: the PDF text lists 24 distinct use case descriptions (IDs #0-1 to #5-5; no
 
 | UC ID | Name | Actor | Scope | Implemented | Tested | Demo-ready | Notes |
 |-------|------|-------|-------|:-:|:-:|:-:|-------|
-| #0-1 | AuthenticateWithSingpass | All mobile roles | In scope (mocked) | x | x | x | Mock picker; age and role check (`e2e`, 1.1 tests). Mobile login verified on mobile web (3.1). Real Singpass not built. |
+| #0-1 | AuthenticateWithSingpass | All mobile roles | In scope (mocked) | x | x | x | Fake Singpass screen (ADR-001); age and role check (`e2e`, 1.1 tests). Mobile login verified on mobile web (3.1). Real Singpass not built. |
 | #0-2 | AuthenticateWithAdminCredentials | Admin, Partner | In scope | x | x | x | Staff login and `recordStaffLogin` in `e2e`. Web login verified in browser (3.1). |
 | #1-2 | CreateWorkshop | Instructor | In scope | x | partial | partial | Backend (`createWorkshop`) in `e2e`. Mobile create form not run (3.1). |
 | #1-3 | RequestVenue | Instructor | In scope | x | partial | partial | Request and approval in `e2e` and emulator tests. Mobile venue screen (list view, map is schematic) not run. |

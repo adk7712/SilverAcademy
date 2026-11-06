@@ -7,6 +7,7 @@ export interface SegmentOption<T> {
   value: T;
   label: string;
   accessibilityLabel?: string;
+  testID?: string;
 }
 
 interface SegmentedProps<T> {
@@ -41,9 +42,11 @@ export function Segmented<T extends string | number>({
           <Pressable
             key={String(option.value)}
             onPress={() => onChange(option.value)}
+            testID={option.testID}
             accessibilityRole="radio"
             accessibilityLabel={option.accessibilityLabel ?? option.label}
             accessibilityState={{ selected, checked: selected }}
+            aria-checked={selected} // react-native-web does not map accessibilityState
             style={{
               flex: 1,
               minHeight: sizes.iconButton,

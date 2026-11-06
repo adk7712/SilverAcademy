@@ -1,7 +1,7 @@
 // UC #0-1 auth-exchangeSingpass: verify assertion -> create/refresh user -> set claims -> custom token.
 import type { Auth } from 'firebase-admin/auth';
 import { AppError, type SingpassVerifier } from '@silveracademy/shared';
-import { defineCallable, getAdminAuth, type CallableContext } from '../../common';
+import { authMode, defineCallable, getAdminAuth, type CallableContext } from '../../common';
 import { singpassUid } from '../controller/singpassLogin';
 import { issueCustomToken, syncClaimsFromUserDoc } from '../repo/claimsRepo';
 import { loginTransaction } from '../repo/usersRepo';
@@ -16,7 +16,13 @@ export async function exchangeSingpass(
   const { assertion, nonce, registerAs } = ctx.input;
   const identity = await verifier.verify({ assertion, ...(nonce ? { nonce } : {}) });
   const uid = singpassUid(identity.sub);
-  const result = await loginTransaction(ctx.db, { uid, identity, registerAs, now: ctx.now });
+  const result = await loginTransaction(ctx.db, {
+    uid,
+    identity,
+    registerAs,
+    now: ctx.now,
+    mockMode: authMode() === 'mock',
+  });
   const claims = await syncClaimsFromUserDoc(ctx.db, auth, uid, result.roles, result.displayName);
   if (claims.status !== 'ACTIVE') throw new AppError('ACCOUNT_SUSPENDED'); // suspended while logging in (M2)
   const customToken = await issueCustomToken(auth, uid, claims);

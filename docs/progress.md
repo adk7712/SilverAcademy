@@ -76,3 +76,4 @@ Note 2026-10-19: 4.2 mobile sweep fixes done; see `handoffs/4.2-mobile-fixes.md`
 
 - 2026-11-01 G real events and real map (issue #2): Ayer Rajah real event in the seed, OSM map on Discover and workshop detail. See docs/handoffs/G-real-events-map.md.
 - 2026-11-04 G second real event: Christmas @ Changi Simei 2026 (12 Dec 2026) in the seed.
+- 2026-11-04 F fake Singpass login (issue #1): Singpass-style fake login on mobile, `suspended-demo` seed profile. Code and docs done on `feat/fake-singpass`, verified on Expo mobile web against emulators; native devices not run (owner to check on a phone). See docs/handoffs/F-fake-singpass.md.

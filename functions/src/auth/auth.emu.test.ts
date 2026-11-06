@@ -76,6 +76,27 @@ describe('auth-exchangeSingpass (emulator)', () => {
     await expect(exchange('senior-72')).rejects.toMatchObject({ code: 'ACCOUNT_SUSPENDED' });
   });
 
+  it('suspended-demo with no user doc is refused and never registered; with a reactivated doc it logs in', async () => {
+    const uid = uidOf('S-MOCK-SUSPENDED');
+    await db.doc(`users/${uid}`).delete();
+    await expect(exchange('suspended-demo', 'LEARNER')).rejects.toMatchObject({
+      code: 'ACCOUNT_SUSPENDED',
+    });
+    await expect(exchange('suspended-demo')).rejects.toMatchObject({ code: 'ACCOUNT_SUSPENDED' });
+    expect((await db.doc(`users/${uid}`).get()).exists).toBe(false);
+
+    await db.doc(`users/${uid}`).set({
+      uid,
+      authType: 'SINGPASS',
+      roles: ['LEARNER'],
+      status: 'ACTIVE',
+      displayName: 'Koh Beng Huat',
+    });
+    await expect(exchange('suspended-demo')).resolves.toMatchObject({ isNewUser: false });
+    await db.doc(`users/${uid}`).update({ status: 'SUSPENDED' });
+    await expect(exchange('suspended-demo')).rejects.toMatchObject({ code: 'ACCOUNT_SUSPENDED' });
+  });
+
   it('IdP exceptions surface and create nothing', async () => {
     await expect(exchange('FAIL', 'LEARNER')).rejects.toMatchObject({
       code: 'SINGPASS_AUTH_FAILED',

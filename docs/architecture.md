@@ -484,16 +484,17 @@ export interface SingpassVerifier {
 }
 
 export interface MockSingpassProfile extends SingpassIdentity {
-  profileId: string;          // e.g. 'learner-35', 'senior-62', 'senior-50', 'volunteer-28', 'senior-49-edge'
-  label: string;              // shown on the mock login picker
+  profileId: string;          // e.g. 'learner-35', 'senior-62', 'senior-50', 'volunteer-28', 'senior-49-edge', 'suspended-demo'
+  label: string;              // shown on the fake Singpass screen
   suggestedRegisterAs: RegisterAs;
 }
 export const MOCK_SINGPASS_PROFILES: readonly MockSingpassProfile[]; // packages/shared/src/auth/mockSingpassProfiles.ts
 // Special profileIds: 'FAIL' → SINGPASS_AUTH_FAILED, 'DOWN' → SINGPASS_UNAVAILABLE (demo the exceptions).
+// 'suspended-demo' (`MOCK_SUSPENDED_PROFILE_ID` in shared) is seeded SUSPENDED → login returns ACCOUNT_SUSPENDED.
 ```
 
 Login sequence (mobile): `authProvider.authenticate()` → `call auth-exchangeSingpass({ assertion, registerAs? })` → `signInWithCustomToken(customToken)` → `getIdTokenResult()` for `roles` → show mode toggle iff roles include both LEARNER and SENIOR_INSTRUCTOR. If the response is `REGISTRATION_REQUIRED` the app shows "Join as Learner / Volunteer" and repeats the call with `registerAs`.
-Server (`auth-exchangeSingpass`): verifier selected by env `AUTH_MODE` (`mock` in emulators; `MockSingpassVerifier` refuses to run otherwise). `uid = 'sp_' + sha256(sub).slice(0, 20)`. Age = full years from `dateOfBirth` at `now` (SG time). New user: roles `LEARNER` (+ `SENIOR_INSTRUCTOR` if age >= `SENIOR_MIN_AGE`) or `VOLUNTEER`; create `users` doc. Existing user: refresh `seniorEligible`/SI role; status not ACTIVE → `ACCOUNT_SUSPENDED`. Set claims; `createCustomToken(uid, claims)`.
+Server (`auth-exchangeSingpass`): verifier selected by env `AUTH_MODE` (`mock` in emulators; `MockSingpassVerifier` refuses to run otherwise). `uid = 'sp_' + sha256(sub).slice(0, 20)`. Age = full years from `dateOfBirth` at `now` (SG time). New user: roles `LEARNER` (+ `SENIOR_INSTRUCTOR` if age >= `SENIOR_MIN_AGE`) or `VOLUNTEER`; create `users` doc. Existing user: refresh `seniorEligible`/SI role; status not ACTIVE → `ACCOUNT_SUSPENDED`. Mock mode only: the `suspended-demo` identity with no user doc → `ACCOUNT_SUSPENDED` (never registers). Set claims; `createCustomToken(uid, claims)`.
 
 Staff login (web, not an external service): Firebase email/password with email `${userId}@staff.silveracademy.test` (Firebase Auth hashes passwords: NFR 1.3). Then `auth-recordStaffLogin({ userId, outcome })` for audit. `auth/user-disabled` → "Account suspended, contact the platform team" and outcome `BLOCKED`. Wrong credentials → clear form, generic "Invalid Credentials. Access Denied", outcome `FAILURE`.
 

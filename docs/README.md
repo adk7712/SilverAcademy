@@ -7,6 +7,7 @@ Start here: the root `README.md` (overview and quick start), then `dev-guide.md`
 | `../README.md` | Project overview, quick start, tests, repo layout |
 | `dev-guide.md` | Setup, demo accounts, demo script for the PDF flows, gotchas, troubleshooting, onboarding |
 | `progress.md` | Task status board (owner model, status, date, handoff). Note the 2.x task-ID split between mobile and web |
+| `assignments.md` | Work split by person and workstream, from `next-steps.md`, `known-limitations.md` and the TA's two new items |
 | `known-limitations.md` | Open issues, deferred items, unverified areas and accepted risks, consolidated from handoffs and the review |
 | `next-steps.md` | Prioritised list (P1, P2, P3) for the next developer |
 | `requirements-map.md` | Use case -> module -> screen -> data, NFR map, spec ambiguities |

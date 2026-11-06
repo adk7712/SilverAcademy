@@ -1,9 +1,11 @@
 // Seed accounts and instructor profiles (task 0.5). UC #0-1, #0-2, #5-5.
 // Singpass users come from MOCK_SINGPASS_PROFILES. Roles follow architecture.md 5.1: LEARNER, plus SENIOR_INSTRUCTOR when
 // age >= SENIOR_MIN_AGE; volunteers are VOLUNTEER only. Staff login email is <staffUserId>@staff.silveracademy.test.
+// Profiles listed in SUSPENDED_PROFILE_IDS are seeded SUSPENDED so Singpass login answers ACCOUNT_SUSPENDED.
 // Names and profile text are fictional demo data.
 import {
   MOCK_SINGPASS_PROFILES,
+  MOCK_SUSPENDED_PROFILE_ID,
   findMockProfile,
   isSeniorEligible,
   type InstructorProfile,
@@ -27,6 +29,8 @@ export const PROFILE_IDS = {
   volunteerPriya: 'volunteer-28',
 } as const;
 export type PersonKey = keyof typeof PROFILE_IDS;
+
+const SUSPENDED_PROFILE_IDS: readonly string[] = [MOCK_SUSPENDED_PROFILE_ID];
 
 export const STAFF_IDS = { admin: 'admin01', partner: 'partner01' } as const;
 export const PARTNER_ORG_NAME = 'Demo Community Partner Pte Ltd';
@@ -77,14 +81,15 @@ export function buildAccounts(
     const uid = singpassUid(profile.sub);
     const senior = isSeniorEligible(profile.dateOfBirth, now);
     const roles = rolesFor(profile, senior);
-    authUsers.push({ uid, displayName: profile.name, roles });
+    const status = SUSPENDED_PROFILE_IDS.includes(profile.profileId) ? 'SUSPENDED' : 'ACTIVE';
+    authUsers.push({ uid, displayName: profile.name, roles, status });
     const user: User = {
       uid,
       authType: 'SINGPASS',
       displayName: profile.name,
       displayNameLower: profile.name.toLowerCase(),
       roles,
-      status: 'ACTIVE',
+      status,
       flagged: false,
       seniorEligible: senior,
       ageVerifiedAt: stamp,

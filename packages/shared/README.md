@@ -12,6 +12,6 @@ Types, enums, zod schemas, constants and pure logic shared by mobile, web and fu
 | `callables.ts` | `CALLABLES` registry, `CallableName`, `CallableInput<N>`, `CallableOutput<N>`.                                                      |
 | `logic/`       | Pure helpers: workshop filter/sort/recommend, check-in window, age, ticket/QR parse, voucher code.                                  |
 | `services/`    | `AuthProvider`, `SingpassVerifier`, `MapProvider` interfaces (implementations: tasks 1.1, 1.6).                                     |
-| `auth/`        | `MOCK_SINGPASS_PROFILES`.                                                                                                           |
+| `auth/`        | `MOCK_SINGPASS_PROFILES` (incl. the seeded-suspended `suspended-demo`), FAIL/DOWN/suspended profile id constants.                   |
 
 Tests sit next to sources (`*.test.ts`); run `npm test` from the repo root.

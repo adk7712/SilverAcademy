@@ -32,7 +32,7 @@ HttpsError code mapping: `architecture.md` §6. `MAP_UNAVAILABLE` is client-only
 
 | Function | Roles | Input | Output | Errors | Notes |
 |---|---|---|---|---|---|
-| `auth-exchangeSingpass` (#0-1) | public | `{ assertion: string, nonce?: string, registerAs?: 'LEARNER'\|'VOLUNTEER' }` | `{ customToken, uid, roles: Role[], seniorEligible, isNewUser }` | SINGPASS_AUTH_FAILED, SINGPASS_UNAVAILABLE, PROFILE_UNAVAILABLE, REGISTRATION_REQUIRED (new user, no `registerAs`), ACCOUNT_SUSPENDED | Creates/updates `users`, sets claims. See arch §5.1. |
+| `auth-exchangeSingpass` (#0-1) | public | `{ assertion: string, nonce?: string, registerAs?: 'LEARNER'\|'VOLUNTEER' }` | `{ customToken, uid, roles: Role[], seniorEligible, isNewUser }` | SINGPASS_AUTH_FAILED, SINGPASS_UNAVAILABLE, PROFILE_UNAVAILABLE, REGISTRATION_REQUIRED (new user, no `registerAs`), ACCOUNT_SUSPENDED (also, in mock mode only, for the `suspended-demo` identity when it has no user doc) | Creates/updates `users`, sets claims. See arch §5.1. |
 | `auth-recordStaffLogin` (#0-2) | public | `{ userId: string, outcome: 'SUCCESS'\|'FAILURE'\|'BLOCKED' }` | `{ roles: Role[] }` (SUCCESS) or `{}` | NOT_STAFF_ACCOUNT (SUCCESS caller lacks ADMIN/CP, or `userId` != caller's `staffUserId`) | Audit `STAFF_LOGIN` with outcome. SUCCESS requires auth; FAILURE/BLOCKED callable unauthenticated. Web signs out on NOT_STAFF_ACCOUNT. `userId` is lowercased (case-insensitive). FAILURE/BLOCKED are client-reported (`details.clientReported`) and rate-limited (5/min per known staff id, 10/min for unknown ids, 60/min overall): over the cap the call returns `{}` without writing. Claims status comes from `users/{uid}.status`. |
 
 ## 2. users
