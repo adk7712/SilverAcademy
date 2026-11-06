@@ -1,0 +1,63 @@
+# Dependabot version updates. Security updates also need "Dependabot alerts" and
+# "Dependabot security updates" turned on in the repo settings (admin only).
+version: 2
+updates:
+  # One lockfile for all npm workspaces (apps/*, packages/*, functions).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Asia/Singapore
+    open-pull-requests-limit: 5
+    # Skip releases younger than a few days (supply-chain safety; most bad releases are pulled quickly).
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: deps
+    ignore:
+      # The Expo SDK pins these together. Upgrade them with `npx expo install --fix`
+      # or an SDK upgrade, not one at a time. Patch releases still come through.
+      - dependency-name: expo
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: expo-*
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@expo/*'
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: react
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@types/react*'
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: react-native
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: react-native-*
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: '@react-native-async-storage/*'
+        update-types: [version-update:semver-major, version-update:semver-minor]
+    groups:
+      firebase:
+        patterns: ['firebase', 'firebase-*', '@firebase/*']
+      tooling:
+        dependency-type: development
+        exclude-patterns: ['firebase*', '@firebase/*']
+        update-types: [minor, patch]
+      runtime-minor-patch:
+        dependency-type: production
+        exclude-patterns: ['firebase*', '@firebase/*']
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Asia/Singapore
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns: ['*']
