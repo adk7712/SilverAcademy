@@ -89,14 +89,14 @@ export async function cancelBooking(
       tx.get(bookingRef),
       tx.get(workshopRef),
     ]);
-    const decision = decideCancellation(bookingSnap.data(), workshopSnap.data(), caller.uid, now);
-    if (decision.changed) {
+    const seatsTaken = decideCancellation(bookingSnap.data(), workshopSnap.data(), caller.uid, now);
+    if (seatsTaken !== null) {
       tx.update(bookingRef, {
         status: 'CANCELLED',
         updatedAt: FieldValue.serverTimestamp(),
       });
       tx.update(workshopRef, {
-        seatsTaken: decision.seatsTakenAfter,
+        seatsTaken,
         updatedAt: FieldValue.serverTimestamp(),
       });
     }

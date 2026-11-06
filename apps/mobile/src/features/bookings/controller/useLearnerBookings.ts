@@ -32,13 +32,23 @@ export function useLearnerBookings(): LearnerBookingsState {
   const [cachedAt, setCachedAt] = useState<Date | null>(null);
   const [tick, setTick] = useState(0);
 
-  const [cancelling, setCancelling] = useState(false);
-  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [{ cancelling, cancelError }, setCancellation] = useState({
+    cancelling: false,
+    cancelError: null as string | null,
+  });
   const busy = useRef(false);
   // A read started before cancellation must not restore the old ticket afterwards.
   const revision = useRef(0);
   const currentBookings = useRef(bookings);
-  currentBookings.current = bookings;
+
+  const saveBookings = useCallback(
+    (next: BookingView[]) => {
+      currentBookings.current = next;
+      setBookings(next);
+      return uid ? cacheTickets(uid, next) : Promise.resolve();
+    },
+    [uid],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -50,14 +60,14 @@ export function useLearnerBookings(): LearnerBookingsState {
         try {
           const fresh = await fetchOwnBookings(uid);
           if (!live || readRevision !== revision.current) return;
-          setBookings(fresh);
+          void saveBookings(fresh);
           setCachedAt(null);
           setError(null);
-          void cacheTickets(uid, fresh);
         } catch (e) {
           const cached = await readCachedTickets(uid);
           if (!live || readRevision !== revision.current) return;
           if (cached) {
+            currentBookings.current = cached.bookings;
             setBookings(cached.bookings);
             setCachedAt(cached.savedAt);
             setError(null);
@@ -71,7 +81,7 @@ export function useLearnerBookings(): LearnerBookingsState {
       return () => {
         live = false;
       };
-    }, [uid, tick]),
+    }, [uid, tick, saveBookings]),
   );
 
   const reload = useCallback(() => setTick((t) => t + 1), []);
@@ -79,25 +89,21 @@ export function useLearnerBookings(): LearnerBookingsState {
     async (workshopId: string): Promise<boolean> => {
       if (!uid || busy.current) return false;
       busy.current = true;
-      setCancelling(true);
-      setCancelError(null);
+      setCancellation({ cancelling: true, cancelError: null });
       try {
         const result = await cancelOwnBooking(workshopId);
         revision.current += 1;
-        const updated = markBookingCancelled(currentBookings.current, result.bookingId);
-        currentBookings.current = updated;
-        setBookings(updated);
-        await cacheTickets(uid, updated);
+        await saveBookings(markBookingCancelled(currentBookings.current, result.bookingId));
+        setCancellation({ cancelling: false, cancelError: null });
         return true;
       } catch (e) {
-        setCancelError(errorMessage(e));
+        setCancellation({ cancelling: false, cancelError: errorMessage(e) });
         return false;
       } finally {
         busy.current = false;
-        setCancelling(false);
       }
     },
-    [uid],
+    [uid, saveBookings],
   );
 
   return { bookings, loading, error, cachedAt, reload, cancelling, cancelError, cancel };

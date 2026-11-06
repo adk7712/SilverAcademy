@@ -191,8 +191,8 @@ describe('decideCancellation', () => {
     decideCancellation(b, w, 'l1', now);
 
   it('releases exactly one seat without going below zero', () => {
-    expect(cancel()).toEqual({ changed: true, seatsTakenAfter: 1 });
-    expect(cancel(own(), workshop({ seatsTaken: 0 })).seatsTakenAfter).toBe(0);
+    expect(cancel()).toBe(1);
+    expect(cancel(own(), workshop({ seatsTaken: 0 }))).toBe(0);
   });
   it('retries cancelled bookings without decrementing, even after admin cancellation/start', () => {
     expect(
@@ -201,7 +201,7 @@ describe('decideCancellation', () => {
         workshop({ status: 'CANCELLED', seatsTaken: 1 }),
         new Date(END),
       ),
-    ).toEqual({ changed: false, seatsTakenAfter: 1 });
+    ).toBeNull();
   });
   it('checks ownership before exposing state, including cancelled bookings', () => {
     expect(codeOf(() => cancel(own({ learnerId: 'other', status: 'CANCELLED' })))).toBe(
