@@ -25,49 +25,49 @@ export function LearnerTabs() {
   const options = useMemo(() => tabScreenOptions(theme), [theme]);
   return (
     <Tab.Navigator screenOptions={options}>
-  <Tab.Screen
-    name="DiscoverTab"
-    component={DiscoverStack}
-    options={{
-      title: strings.nav.tabs.discover,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="search-outline" size={size} color={color} />
-      ),
-    }}
-  />
+      <Tab.Screen
+        name="DiscoverTab"
+        component={DiscoverStack}
+        options={{
+          title: strings.nav.tabs.discover,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search-outline" size={size} color={color} />
+          ),
+        }}
+      />
 
-  <Tab.Screen
-    name="MyBookingsTab"
-    component={MyBookingsStack}
-    options={{
-      title: strings.nav.tabs.myBookings,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="calendar-outline" size={size} color={color} />
-      ),
-    }}
-  />
+      <Tab.Screen
+        name="MyBookingsTab"
+        component={MyBookingsStack}
+        options={{
+          title: strings.nav.tabs.myBookings,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar-outline" size={size} color={color} />
+          ),
+        }}
+      />
 
-  <Tab.Screen
-    name="ReportTab"
-    component={ReportStack}
-    options={{
-      title: strings.nav.tabs.report,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="alert-circle-outline" size={size} color={color} />
-      ),
-    }}
-  />
+      <Tab.Screen
+        name="ReportTab"
+        component={ReportStack}
+        options={{
+          title: strings.nav.tabs.report,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="alert-circle-outline" size={size} color={color} />
+          ),
+        }}
+      />
 
-  <Tab.Screen
-    name="ProfileTab"
-    component={ProfileStack}
-    options={{
-      title: strings.nav.tabs.profile,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="person-outline" size={size} color={color} />
-      ),
-    }}
-  />
-</Tab.Navigator>
+      <Tab.Screen
+        name="ProfileTab"
+        component={ProfileStack}
+        options={{
+          title: strings.nav.tabs.profile,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" size={size} color={color} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
   );
 }
