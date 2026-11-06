@@ -37,6 +37,7 @@ export function TicketScreen() {
       <>
         {cancelError ? <ErrorBanner message={cancelError} /> : null}
         <CancelBookingAction
+          key={booking.id}
           booking={booking}
           offline={!!cachedAt}
           busy={cancelling || loading}
