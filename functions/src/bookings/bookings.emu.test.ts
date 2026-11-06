@@ -3,6 +3,9 @@ import { getApps, initializeApp } from 'firebase-admin/app';
 import { Timestamp, getFirestore } from 'firebase-admin/firestore';
 import type { Role, User } from '@silveracademy/shared';
 import { verifyQr, type Caller } from '../common';
+import { recordAttendance } from '../attendance/handlers/recordAttendance';
+import { adminSetStatus } from '../workshops/repo/adminWorkshopRepo';
+import { cancelBooking } from './repo/bookingRepo';
 import { bookWorkshop } from './handlers/bookWorkshop';
 import { getRoster } from './handlers/getRoster';
 
@@ -190,5 +193,101 @@ describe('bookings-getRoster (emulator)', () => {
     await expect(
       getRoster(db, caller('admin', ['ADMIN']), { workshopId: 'missing' }),
     ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
+});
+
+describe('bookings-cancelBooking (emulator)', () => {
+  it('concurrent retries free one seat and retain an invalid ticket', async () => {
+    const id = await makeWorkshop(1);
+    const ticket = await book(id, 'cancel-owner');
+    const cancel = () => cancelBooking(db, caller('cancel-owner'), id, NOW);
+    const results = await Promise.all([cancel(), cancel()]);
+    expect(results).toEqual([
+      { bookingId: ticket.bookingId, status: 'CANCELLED' },
+      { bookingId: ticket.bookingId, status: 'CANCELLED' },
+    ]);
+    expect(await seats(id)).toBe(0);
+    const stored = (await db.doc(`bookings/${ticket.bookingId}`).get()).data();
+    expect(stored).toMatchObject({
+      status: 'CANCELLED',
+      ticketCode: ticket.ticketCode,
+      qrPayload: ticket.qrPayload,
+    });
+    await expect(book(id, 'cancel-owner')).rejects.toMatchObject({ code: 'ALREADY_BOOKED' });
+    await book(id, 'replacement-learner');
+    expect(await seats(id)).toBe(1);
+  });
+  it('another learner cannot cancel the owner ticket', async () => {
+    const id = await makeWorkshop(1);
+    await book(id, 'private-owner');
+    await expect(cancelBooking(db, caller('stranger'), id, NOW)).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    });
+    expect(await seats(id)).toBe(1);
+    expect((await bookingsOf(id))[0]?.status).toBe('CONFIRMED');
+  });
+  it('rejected cancellation leaves booking and seat unchanged', async () => {
+    const id = await makeWorkshop(1);
+    await book(id, 'late-learner');
+    await expect(cancelBooking(db, caller('late-learner'), id, START)).rejects.toMatchObject({
+      code: 'WORKSHOP_STARTED',
+    });
+    expect(await seats(id)).toBe(1);
+    expect((await bookingsOf(id))[0]?.status).toBe('CONFIRMED');
+  });
+  it('concurrent booking and cancellation preserve the seat count', async () => {
+    const id = await makeWorkshop(2);
+    await book(id, 'leaving-learner');
+    await Promise.all([
+      cancelBooking(db, caller('leaving-learner'), id, NOW),
+      book(id, 'arriving-learner'),
+    ]);
+    expect(await seats(id)).toBe(1);
+    expect((await bookingsOf(id)).filter((b) => b.status === 'CONFIRMED')).toHaveLength(1);
+  });
+});
+
+describe('cancelled booking integrations (emulator)', () => {
+  it('rejects the cancelled QR and manual ticket without recording attendance', async () => {
+    const id = await makeWorkshop(1);
+    const ticket = await book(id, 'invalid-ticket');
+    await cancelBooking(db, caller('invalid-ticket'), id, NOW);
+    for (const input of [
+      { workshopId: id, qrPayload: ticket.qrPayload },
+      { workshopId: id, ticketCode: ticket.ticketCode },
+    ]) {
+      await expect(
+        recordAttendance({
+          db,
+          caller: caller('si-owner', ['SENIOR_INSTRUCTOR']),
+          input,
+          now: START,
+        }),
+      ).rejects.toMatchObject({ code: 'NO_BOOKING' });
+    }
+    expect((await db.doc(`attendance/${ticket.bookingId}`).get()).exists).toBe(false);
+    expect(await seats(id)).toBe(0);
+  });
+  it('serializes learner and admin cancellation without freeing another learner seat twice', async () => {
+    const id = await makeWorkshop(2);
+    await book(id, 'admin-race-a');
+    await book(id, 'admin-race-b');
+    await Promise.all([
+      cancelBooking(db, caller('admin-race-a'), id, NOW),
+      adminSetStatus(
+        db,
+        caller('admin', ['ADMIN']),
+        {
+          workshopId: id,
+          status: 'CANCELLED',
+          reason: 'Venue closed',
+          confirmImpact: true,
+          expectedVersion: 1,
+        },
+        NOW,
+      ),
+    ]);
+    expect(await seats(id)).toBe(0);
+    expect((await bookingsOf(id)).map((b) => b.status)).toEqual(['CANCELLED', 'CANCELLED']);
   });
 });

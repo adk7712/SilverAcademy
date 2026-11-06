@@ -1,5 +1,7 @@
 // UC #2-3 tests for the pure ticket cache and grouping logic.
 import {
+  canCancelBooking,
+  markBookingCancelled,
   fromStored,
   groupBookings,
   isTicketValid,
@@ -69,5 +71,24 @@ describe('groupBookings', () => {
   it('cancelled tickets are invalid', () => {
     expect(isTicketValid({ status: 'CANCELLED' })).toBe(false);
     expect(isTicketValid({ status: 'ATTENDED' })).toBe(true);
+  });
+});
+
+describe('learner cancellation', () => {
+  const now = new Date('2026-10-31T00:00:00Z');
+  it('only offers cancellation for confirmed bookings strictly before start', () => {
+    expect(canCancelBooking(view({}), now)).toBe(true);
+    expect(canCancelBooking(view({}), view({}).startAt)).toBe(false);
+    expect(canCancelBooking(view({}), view({}).endAt)).toBe(false);
+    expect(canCancelBooking(view({ status: 'ATTENDED' }), now)).toBe(false);
+    expect(canCancelBooking(view({ status: 'CANCELLED' }), now)).toBe(false);
+  });
+  it('persists cancellation in the offline cache and removes it from upcoming tickets', () => {
+    const original = [view({}), view({ id: 'other' })];
+    const updated = markBookingCancelled(original, 'w1_u1');
+    const restored = fromStored(JSON.parse(JSON.stringify(toStored(updated, now))))!.bookings;
+    expect(original[0]?.status).toBe('CONFIRMED');
+    expect(isTicketValid(restored[0]!)).toBe(false);
+    expect(groupBookings(restored, now).upcoming.map((b) => b.id)).toEqual(['other']);
   });
 });

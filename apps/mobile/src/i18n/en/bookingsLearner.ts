@@ -1,5 +1,10 @@
 // English strings for the Learner bookings screens (UC #2-3 ViewTicket; task 2.2).
 export const bookingsLearner = {
+  cancelBooking: 'Cancel booking',
+  cancelConfirm: 'Cancel this booking and release your seat? You cannot book this workshop again.',
+  confirmCancel: 'Yes, cancel booking',
+  keepBooking: 'Keep booking',
+  cancellationOnline: 'Connect to the internet to cancel a booking.',
   upcomingTitle: 'Upcoming',
   pastTitle: 'Past and cancelled',
   emptyTitle: 'No bookings yet',

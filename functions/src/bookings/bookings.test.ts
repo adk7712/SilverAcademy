@@ -7,6 +7,7 @@ import {
   type VolunteerAssignment,
   type Workshop,
 } from '@silveracademy/shared';
+import { decideCancellation } from './controller/decideCancellation';
 import { decideBooking, snapshotToIso } from './controller/decideBooking';
 import { buildRoster, decideRosterAccess } from './controller/decideRoster';
 import { generateTicketCode } from './controller/ticketCode';
@@ -181,5 +182,48 @@ describe('buildRoster', () => {
   it('unscheduled workshop maps to null times and venue', () => {
     const r = buildRoster('ws1', workshop({ startAt: null, endAt: null, venue: null }), [], []);
     expect(r.workshop).toMatchObject({ startAt: null, endAt: null, venue: null });
+  });
+});
+
+describe('decideCancellation', () => {
+  const own = (over: Partial<Booking> = {}) => booking({ learnerId: 'l1', ...over });
+  const cancel = (b = own(), w: Workshop | undefined = workshop({ seatsTaken: 2 }), now = NOW) =>
+    decideCancellation(b, w, 'l1', now);
+
+  it('releases exactly one seat without going below zero', () => {
+    expect(cancel()).toEqual({ changed: true, seatsTakenAfter: 1 });
+    expect(cancel(own(), workshop({ seatsTaken: 0 })).seatsTakenAfter).toBe(0);
+  });
+  it('retries cancelled bookings without decrementing, even after admin cancellation/start', () => {
+    expect(
+      cancel(
+        own({ status: 'CANCELLED' }),
+        workshop({ status: 'CANCELLED', seatsTaken: 1 }),
+        new Date(END),
+      ),
+    ).toEqual({ changed: false, seatsTakenAfter: 1 });
+  });
+  it('checks ownership before exposing state, including cancelled bookings', () => {
+    expect(codeOf(() => cancel(own({ learnerId: 'other', status: 'CANCELLED' })))).toBe(
+      'PERMISSION_DENIED',
+    );
+  });
+  it('rejects missing bookings and workshops', () => {
+    expect(codeOf(() => decideCancellation(undefined, workshop(), 'l1', NOW))).toBe('NOT_FOUND');
+    expect(codeOf(() => decideCancellation(own(), undefined, 'l1', NOW))).toBe('NOT_FOUND');
+  });
+  it('rejects attended bookings even before start (early check-in)', () => {
+    expect(codeOf(() => cancel(own({ status: 'ATTENDED' })))).toBe('INVALID_TRANSITION');
+  });
+  it.each(['DRAFT', 'PENDING_VENUE', 'COMPLETED', 'CANCELLED', 'ARCHIVED'] as const)(
+    'rejects a confirmed booking on a %s workshop',
+    (status) => {
+      expect(codeOf(() => cancel(own(), workshop({ status })))).toBe('WORKSHOP_NOT_OPEN');
+    },
+  );
+  it('uses the live schedule and rejects missing start, exact start and past start', () => {
+    expect(codeOf(() => cancel(own(), workshop({ startAt: null })))).toBe('WORKSHOP_STARTED');
+    expect(codeOf(() => cancel(own(), workshop(), new Date(START)))).toBe('WORKSHOP_STARTED');
+    expect(codeOf(() => cancel(own(), workshop(), new Date(END)))).toBe('WORKSHOP_STARTED');
   });
 });

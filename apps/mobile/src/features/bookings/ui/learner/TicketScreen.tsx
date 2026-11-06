@@ -15,6 +15,7 @@ import { format, strings } from '../../../../i18n';
 import { formatDateTime, formatRange } from '../../../../services/dateFormat';
 import { useAppRoute } from '../../../../navigation';
 import { isTicketValid } from '../../controller/learnerBookingModel';
+import { CancelBookingAction } from './CancelBookingAction';
 import { useLearnerBookings } from '../../controller/useLearnerBookings';
 import { QrCodeView } from './QrCodeView';
 
@@ -22,7 +23,8 @@ export function TicketScreen() {
   const { spacing } = useTheme();
   const s = strings.bookingsLearner;
   const { bookingId } = useAppRoute<'Ticket'>().params;
-  const { bookings, loading, error, cachedAt, reload } = useLearnerBookings();
+  const { bookings, loading, error, cachedAt, reload, cancelling, cancelError, cancel } =
+    useLearnerBookings();
   const booking = bookings.find((b) => b.id === bookingId);
 
   let body;
@@ -33,6 +35,13 @@ export function TicketScreen() {
     const valid = isTicketValid(booking);
     body = (
       <>
+        {cancelError ? <ErrorBanner message={cancelError} /> : null}
+        <CancelBookingAction
+          booking={booking}
+          offline={!!cachedAt}
+          busy={cancelling || loading}
+          onCancel={cancel}
+        />
         <AppText variant="heading">{booking.title}</AppText>
         {cachedAt ? (
           <ErrorBanner message={format(s.cachedNotice, { when: formatDateTime(cachedAt) })} />

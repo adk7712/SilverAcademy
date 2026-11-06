@@ -1,6 +1,7 @@
 // UC #2-3 ViewTicket: direct read of own bookings plus the offline ticket mirror in AsyncStorage (ADR-019).
 import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
 import type { Booking } from '@silveracademy/shared';
+import { callFunction } from '../../../services/callables';
 import { firestore } from '../../../services/firebase';
 import { readStored, writeStored } from '../../../services/storage';
 import {
@@ -36,3 +37,6 @@ export async function cacheTickets(uid: string, views: readonly BookingView[]): 
 export async function readCachedTickets(uid: string) {
   return fromStored(await readStored<unknown>(ticketCacheKey(uid)));
 }
+
+export const cancelOwnBooking = (workshopId: string) =>
+  callFunction('bookings-cancelBooking', { workshopId });
