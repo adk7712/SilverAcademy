@@ -28,13 +28,14 @@ export interface AdminStatusDecision {
 }
 
 const ARCHIVABLE: readonly WorkshopStatus[] = [
+  'PENDING_REVIEW',
   'DRAFT',
   'PENDING_VENUE',
   'OPEN',
   'COMPLETED',
   'CANCELLED',
 ];
-const CANCELLABLE: readonly WorkshopStatus[] = ['DRAFT', 'PENDING_VENUE', 'OPEN'];
+const CANCELLABLE: readonly WorkshopStatus[] = ['PENDING_REVIEW', 'DRAFT', 'PENDING_VENUE', 'OPEN'];
 /** Fallback when an archived workshop has no stored `statusBeforeArchive`. */
 const UNARCHIVE_FALLBACK: WorkshopStatus = 'COMPLETED';
 
@@ -45,7 +46,7 @@ const isUpcoming = (w: Workshop, now: Date): boolean =>
  * Check order: missing -> NOT_FOUND; version -> STALE_VERSION; transition not allowed -> INVALID_TRANSITION;
  * CANCELLED without reason -> REASON_REQUIRED; impact needs confirming -> ACTIVE_BOOKINGS_CONFIRM_REQUIRED
  * (CANCELLED with seatsTaken > 0; ARCHIVED of an upcoming OPEN workshop with seatsTaken > 0; details `{ seatsTaken }`).
- * Transitions: OPEN -> COMPLETED | CANCELLED | ARCHIVED; DRAFT / PENDING_VENUE -> CANCELLED | ARCHIVED;
+ * Transitions: PENDING_REVIEW -> APPROVE (DRAFT) | CANCELLED (rejection) | ARCHIVED; OPEN -> COMPLETED | CANCELLED | ARCHIVED; DRAFT / PENDING_VENUE -> CANCELLED | ARCHIVED;
  * COMPLETED / CANCELLED -> ARCHIVED; ARCHIVED -> UNARCHIVE (restores statusBeforeArchive).
  */
 export function decideAdminStatus(
@@ -77,6 +78,9 @@ export function decideAdminStatus(
         nextStatus: workshop.statusBeforeArchive ?? UNARCHIVE_FALLBACK,
         statusBeforeArchive: null,
       };
+    case 'APPROVE':
+      if (from !== 'PENDING_REVIEW') invalid();
+      return { ...base, nextStatus: 'DRAFT', statusBeforeArchive: null };
     case 'COMPLETED':
       if (from !== 'OPEN') invalid();
       return { ...base, nextStatus: 'COMPLETED', statusBeforeArchive: null };

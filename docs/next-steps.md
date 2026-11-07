@@ -50,7 +50,7 @@ Start with `dev-guide.md` section 6 and run both demo flows, so you know the cur
 23. **Mobile web cosmetic bug** (F8). Fix the bottom-tab href for nested route params on web.
 24. **Emulator test hygiene** (T3, T4). Make the Jest emulator suites exit cleanly, and document the port cleanup in `dev-guide.md` (already there).
 25. **Mockup extras** (S11). Decide whether voice search, text-to-speech, subsidy labels, the voucher goal card and the live check-in feed belong to the product. If not, say so in the demo script (it already warns against them).
-26. **Curriculum review and CP onboarding** (S7, S8). These are spec gaps (ADR-009, ADR-021). Record the decision in `decisions.md` before building anything.
+26. **CP onboarding** (S8). This is a spec gap (ADR-021); curriculum review is done (ADR-029). Record the decision in `decisions.md` before building anything.
 
 ---
 

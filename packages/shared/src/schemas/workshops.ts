@@ -38,7 +38,10 @@ export const createWorkshopInput = z
     path: ['volunteerSlots'],
     message: 'volunteerSlots must be 0 unless needsVolunteers, else >= 1',
   });
-export const createWorkshopOutput = z.object({ workshopId: idSchema, status: z.literal('DRAFT') });
+export const createWorkshopOutput = z.object({
+  workshopId: idSchema,
+  status: z.literal('PENDING_REVIEW'),
+});
 
 export const updateWorkshopInput = z.object({
   workshopId: idSchema,

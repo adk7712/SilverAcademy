@@ -58,10 +58,9 @@ export function CreateWorkshopScreen() {
   }
 
   const onSubmit = async () => {
-    const workshopId = await submit(form);
-    if (workshopId) {
+    if (await submit(form)) {
       toast.show(t.created, 'success');
-      navigation.replace('VenueRequest', { workshopId });
+      navigation.goBack();
     }
   };
 

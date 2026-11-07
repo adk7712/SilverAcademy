@@ -5,6 +5,7 @@ import type { Tone } from '../../../design';
 import { workshopStrings } from '../strings';
 
 const TONES: Record<WorkshopStatus, Tone> = {
+  PENDING_REVIEW: 'warning',
   DRAFT: 'neutral',
   PENDING_VENUE: 'info',
   OPEN: 'success',

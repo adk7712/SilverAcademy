@@ -81,6 +81,10 @@ describe('decideAdminStatus', () => {
     });
     expect(codeOf(() => set(ws({ status: 'DRAFT' }), 'COMPLETED'))).toBe('INVALID_TRANSITION');
   });
+  it('PENDING_REVIEW -> APPROVE gives DRAFT (curriculum review); only from PENDING_REVIEW', () => {
+    expect(set(ws({ status: 'PENDING_REVIEW' }), 'APPROVE')).toMatchObject({ nextStatus: 'DRAFT' });
+    expect(codeOf(() => set(ws(), 'APPROVE'))).toBe('INVALID_TRANSITION');
+  });
   it('archive of PENDING_VENUE withdraws the request and restores DRAFT on unarchive (M4)', () => {
     const a = set(ws({ status: 'PENDING_VENUE', seatsTaken: 0 }), 'ARCHIVED');
     expect(a).toMatchObject({ withdrawRequest: true, statusBeforeArchive: 'DRAFT' });

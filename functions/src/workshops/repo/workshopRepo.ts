@@ -29,7 +29,7 @@ export function createWorkshopTx(
       instructorId: args.uid,
       instructorName: args.instructorName,
       ...fields,
-      status: 'DRAFT',
+      status: 'PENDING_REVIEW',
       seatsTaken: 0,
       attendedCount: 0,
       volunteersAssigned: 0,

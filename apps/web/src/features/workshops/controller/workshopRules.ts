@@ -7,6 +7,8 @@ type Dated = Pick<Workshop, 'status' | 'seatsTaken' | 'startAt'>;
 /** Mirrors the transition table in docs/api/functions.md (workshops-adminSetStatus). */
 export function availableStatusActions(w: Pick<Workshop, 'status'>): WorkshopAdminAction[] {
   switch (w.status) {
+    case 'PENDING_REVIEW':
+      return ['APPROVE', 'CANCELLED', 'ARCHIVED'];
     case 'OPEN':
       return ['COMPLETED', 'CANCELLED', 'ARCHIVED'];
     case 'DRAFT':

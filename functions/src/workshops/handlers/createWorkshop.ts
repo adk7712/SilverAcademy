@@ -7,13 +7,15 @@ type Ctx = Pick<
   'input' | 'caller' | 'db'
 >;
 
-export async function createWorkshop(ctx: Ctx): Promise<{ workshopId: string; status: 'DRAFT' }> {
+export async function createWorkshop(
+  ctx: Ctx,
+): Promise<{ workshopId: string; status: 'PENDING_REVIEW' }> {
   const { workshopId } = await createWorkshopTx(ctx.db, {
     uid: ctx.caller.uid,
     instructorName: ctx.caller.user.displayName,
     input: ctx.input,
   });
-  return { workshopId, status: 'DRAFT' };
+  return { workshopId, status: 'PENDING_REVIEW' };
 }
 
 export const createWorkshopCallable = defineCallable(

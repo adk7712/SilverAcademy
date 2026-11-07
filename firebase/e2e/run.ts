@@ -283,7 +283,19 @@ async function main(): Promise<void> {
         senior.token,
       );
       const id = String(created.workshopId);
-      check('workshop created as DRAFT', created.status === 'DRAFT');
+      check('workshop created as PENDING_REVIEW', created.status === 'PENDING_REVIEW');
+      await expectError(
+        'venues-requestVenue',
+        { workshopId: id, facilityId: NEW_FACILITY_ID, slotId: NEW_SLOT_ID },
+        senior.token,
+        'WORKSHOP_NOT_EDITABLE',
+      );
+      const approved = await ok(
+        'workshops-adminSetStatus',
+        { workshopId: id, status: 'APPROVE', expectedVersion: 1 },
+        admin.token,
+      );
+      check('curriculum approved -> DRAFT', approved.status === 'DRAFT', approved);
       const req = await ok(
         'venues-requestVenue',
         { workshopId: id, facilityId: NEW_FACILITY_ID, slotId: NEW_SLOT_ID },

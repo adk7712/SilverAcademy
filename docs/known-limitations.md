@@ -36,7 +36,7 @@ Hosted-demo limits are in section 8. Read this before you demo the app or change
 | S4 | Date filter | The Discover date range is a text field (YYYY-MM-DD), not a date picker. No date-picker library is installed. | 2.2 |
 | S5 | Feedback | Feedback (#2-4) is built on mobile with a fixed tag list. Its use case was marked "deferred" in the first `functions.md` draft, and that marking is now stale. | 2.6 |
 | S6 | Reporter reply | A reporter cannot answer an AWAITING_INFO request (L7). The app shows the request but has no reply action. Spec gap #5-3. | review L7 |
-| S7 | Curriculum review | Curriculum review is deferred (ADR-009). Only instructor profile review is built (#5-5). | ADR-009, 1.7 |
+| S7 | Curriculum review | Built as a workshop status (ADR-029): approve or cancel. There is no separate "requires revision" state. | ADR-029 |
 | S8 | Organisation onboarding | No use case for CP organisation onboarding (requirements-map gap; ADR-021). Partner and admin accounts are created by seed or the admin callable. | ADR-021 |
 | S9 | Profile resubmission | Instructor profile resubmission is supported (REJECTED or REQUIRES_REVISION), but it is not in any use case. | ADR-021 |
 | S10 | Use case #1-1 | The PDF text has no #1-1 use case; the count of use cases in the spec is therefore 24 described, plus diagram-only entries. | `checklists/use-case-coverage.md` |

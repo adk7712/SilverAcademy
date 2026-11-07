@@ -106,6 +106,7 @@ export function nextStepFor(status: WorkshopStatus): NextStep {
 export type StatusTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 export function workshopStatusInfo(status: WorkshopStatus): { label: string; tone: StatusTone } {
   const tone: Record<WorkshopStatus, StatusTone> = {
+    PENDING_REVIEW: 'warning',
     DRAFT: 'neutral',
     PENDING_VENUE: 'warning',
     OPEN: 'success',

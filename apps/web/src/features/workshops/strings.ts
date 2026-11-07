@@ -75,6 +75,7 @@ export const workshopStrings = {
     UNARCHIVE: 'Unarchive',
     COMPLETED: 'Mark completed',
     CANCELLED: 'Cancel workshop',
+    APPROVE: 'Approve curriculum',
   } satisfies Record<WorkshopAdminAction, string>,
   confirm: {
     title: (label: string, name: string) => `${label}: ${name}`,
@@ -82,6 +83,8 @@ export const workshopStrings = {
     UNARCHIVE: 'The workshop returns to the status it had before archiving.',
     COMPLETED: 'The workshop is marked as completed.',
     CANCELLED: 'The workshop is cancelled and cannot be reopened.',
+    APPROVE:
+      'The curriculum is approved and the instructor can request a venue. To reject it, cancel the workshop with a reason.',
     reasonLabel: 'Reason',
     reasonHint: 'Required. Recorded in the audit log and sent to affected people.',
     reasonRequired: 'Enter a reason.',
@@ -97,6 +100,7 @@ export const workshopStrings = {
     done: (label: string) => `${label}: done.`,
   },
   statusLabels: {
+    PENDING_REVIEW: 'Pending review',
     DRAFT: 'Draft',
     PENDING_VENUE: 'Pending venue',
     OPEN: 'Open',
