@@ -1,17 +1,12 @@
-// UC #2-1 SearchWorkshops: category, date range, sort controls and reset.
+// UC #2-1 SearchWorkshops: category, date window, postal code, sort controls and reset.
 import { View } from 'react-native';
 import { WORKSHOP_CATEGORIES, type WorkshopCategory } from '@silveracademy/shared';
 import { AppText, Button, Segmented, Select, TextField, useTheme } from '../../../../design';
 import { strings } from '../../../../i18n';
-import type {
-  DateErrors,
-  DiscoverSort,
-  DiscoverState,
-} from '../../controller/learnerDiscoverLogic';
+import type { DiscoverSort, DiscoverState } from '../../controller/learnerDiscoverLogic';
 
 interface Props {
   filters: DiscoverState;
-  dateErrors: DateErrors;
   onChange: (patch: Partial<DiscoverState>) => void;
   onSort: (sort: DiscoverSort) => void;
   onReset: () => void;
@@ -19,7 +14,7 @@ interface Props {
 
 const ALL = 'ALL';
 
-export function FilterPanel({ filters, dateErrors, onChange, onSort, onReset }: Props) {
+export function FilterPanel({ filters, onChange, onSort, onReset }: Props) {
   const { spacing } = useTheme();
   const s = strings.workshopsLearner;
   const options = [
@@ -34,23 +29,26 @@ export function FilterPanel({ filters, dateErrors, onChange, onSort, onReset }: 
         value={filters.category ?? ALL}
         onChange={(v) => onChange({ category: v === ALL ? null : (v as WorkshopCategory) })}
       />
+      <View style={{ gap: spacing.sm }}>
+        <AppText variant="bodyStrong">{s.whenLabel}</AppText>
+        <Segmented
+          value={filters.days ?? 0}
+          onChange={(days) => onChange({ days: days || null })}
+          options={[
+            { value: 0, label: s.whenAny },
+            { value: 7, label: s.when7 },
+            { value: 30, label: s.when30 },
+          ]}
+        />
+      </View>
       <TextField
-        label={s.fromLabel}
-        value={filters.from}
-        onChangeText={(from) => onChange({ from })}
-        placeholder="2026-11-01"
-        keyboardType="numbers-and-punctuation"
-        maxLength={10}
-        error={dateErrors.from ? s.dateInvalid : undefined}
-      />
-      <TextField
-        label={s.toLabel}
-        value={filters.to}
-        onChangeText={(to) => onChange({ to })}
-        placeholder="2026-11-30"
-        keyboardType="numbers-and-punctuation"
-        maxLength={10}
-        error={dateErrors.to || dateErrors.order ? s.dateInvalid : undefined}
+        label={s.postalLabel}
+        helper={s.postalHelper}
+        value={filters.postal}
+        // A new postal code needs a fresh lookup, so "Nearest" must be chosen again.
+        onChangeText={(postal) => onChange({ postal, sort: 'SOONEST' })}
+        keyboardType="number-pad"
+        maxLength={6}
       />
       <View style={{ gap: spacing.sm }}>
         <AppText variant="bodyStrong">{s.sortLabel}</AppText>

@@ -67,13 +67,7 @@ export function DiscoverScreen() {
         onPress={() => setShowFilters((v) => !v)}
       />
       {showFilters ? (
-        <FilterPanel
-          filters={d.filters}
-          dateErrors={d.dateErrors}
-          onChange={d.update}
-          onSort={d.setSort}
-          onReset={d.reset}
-        />
+        <FilterPanel filters={d.filters} onChange={d.update} onSort={d.setSort} onReset={d.reset} />
       ) : null}
       {!showFilters && d.filtered ? (
         <Button label={s.resetFilters} variant="ghost" onPress={d.reset} />
