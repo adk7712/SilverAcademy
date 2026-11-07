@@ -49,7 +49,7 @@ export async function adminUpdateWorkshop(
 /**
  * Archive / unarchive / complete / cancel. CANCELLED (arch 4.7) in one transaction: workshop CANCELLED +
  * `cancelReason`, CONFIRMED bookings -> CANCELLED (`seatsTaken` reduced), slot back to AVAILABLE, a pending venue
- * request withdrawn, notifications to learners / assigned volunteers / the instructor, audit.
+ * request withdrawn, volunteer assignments WITHDRAWN, notifications to learners / volunteers / the instructor, audit.
  * `affectedBookings` = bookings cancelled (0 for other actions).
  */
 export async function adminSetStatus(
@@ -112,6 +112,7 @@ export async function adminSetStatus(
         ? {
             cancelReason: d.cancelReason,
             seatsTaken: Math.max(0, w.seatsTaken - bookings.length),
+            volunteersAssigned: 0,
             activeVenueRequestId: null,
           }
         : {}),
@@ -136,7 +137,13 @@ export async function adminSetStatus(
         });
         notify(b.learnerId, 'LEARNER');
       }
-      for (const v of volunteers) notify(v.volunteerId, 'VOLUNTEER');
+      for (const v of volunteers) {
+        tx.update(db.collection(COL.volunteerAssignments).doc(v.id), {
+          status: 'WITHDRAWN',
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+        notify(v.volunteerId, 'VOLUNTEER');
+      }
       notify(w.instructorId, 'INSTRUCTOR');
       if (slot && slot.data.bookedWorkshopId === w.id) {
         tx.update(slot.ref, {
