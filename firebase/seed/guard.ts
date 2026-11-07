@@ -18,9 +18,25 @@ export interface SeedConfig {
 
 export class SeedRefusedError extends Error {}
 
+/** Opt-in for a hosted demo project: SEED_CLOUD_PROJECT must exactly equal GCLOUD_PROJECT. Needs credentials and explicit passwords. */
+const CLOUD_PROJECT_VAR = 'SEED_CLOUD_PROJECT';
+
 /** Validates env and returns the seed config. Throws SeedRefusedError when the target is not an emulator. */
 export function loadSeedConfig(env: NodeJS.ProcessEnv): SeedConfig {
-  const missing = REQUIRED_EMULATOR_VARS.filter((name) => !env[name]);
+  const cloudProject = env[CLOUD_PROJECT_VAR];
+  const cloud = !!cloudProject && cloudProject === env.GCLOUD_PROJECT;
+  if (cloudProject && !cloud) {
+    throw new SeedRefusedError(`${CLOUD_PROJECT_VAR} must exactly equal GCLOUD_PROJECT.`);
+  }
+  if (cloud && (env.FIRESTORE_EMULATOR_HOST || env.FIREBASE_AUTH_EMULATOR_HOST)) {
+    throw new SeedRefusedError(`${CLOUD_PROJECT_VAR} cannot be combined with emulator hosts.`);
+  }
+  if (cloud && (!env.SEED_ADMIN_PASSWORD || !env.SEED_PARTNER_PASSWORD || !env.QR_HMAC_SECRET)) {
+    throw new SeedRefusedError(
+      'Cloud seed needs SEED_ADMIN_PASSWORD, SEED_PARTNER_PASSWORD and QR_HMAC_SECRET (no dev defaults).',
+    );
+  }
+  const missing = cloud ? [] : REQUIRED_EMULATOR_VARS.filter((name) => !env[name]);
   if (missing.length > 0) {
     throw new SeedRefusedError(
       `Refusing to seed: ${missing.join(', ')} not set. Start emulators with \`npm run emulators\` ` +
@@ -28,7 +44,7 @@ export function loadSeedConfig(env: NodeJS.ProcessEnv): SeedConfig {
     );
   }
   const projectId = env.GCLOUD_PROJECT || DEFAULT_PROJECT_ID;
-  if (!projectId.startsWith(DEMO_PROJECT_PREFIX)) {
+  if (!cloud && !projectId.startsWith(DEMO_PROJECT_PREFIX)) {
     throw new SeedRefusedError(
       `Refusing to seed project "${projectId}": emulator seed only runs on "${DEMO_PROJECT_PREFIX}*" projects.`,
     );

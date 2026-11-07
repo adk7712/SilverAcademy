@@ -2,7 +2,7 @@
 
 Consolidated from the handoffs in `handoffs/` and from `review-findings.md` (task 3.2, with fixes in 3.3). Each item says what is wrong, why it matters for a demo or for the product, and where to look. Items are grouped by area. "Accepted" means a decision was made in an ADR or handoff not to fix it for the prototype.
 
-Read this before you demo the app or change one of the flagged areas. Priority order for fixing is in `next-steps.md`.
+Hosted-demo limits are in section 8. Read this before you demo the app or change one of the flagged areas. Priority order for fixing is in `next-steps.md`.
 
 ---
 
@@ -153,3 +153,20 @@ H1 (roster no longer returns ticket codes), H2 (offline claims fallback), M1 (id
 - **Leaving during the server call.** Back and Android back stay available while the server exchange runs (so a hung call cannot trap the user) and are hidden only once the token sign-in has started. A stale attempt never signs in. But leaving cannot recall an exchange already sent: the server may still create the user doc (first login) or refresh roles. The device just ignores the result.
 - **Session never loads after sign-in.** If hydration does not finish within `SESSION_HYDRATE_FALLBACK_MS`, the app signs out of Firebase and shows the generic "Something went wrong" error, so retrying the same account hydrates again. Only the fixed 15 second timer decides this; a session that loads later than that is lost and the user logs in again.
 - **`npm run e2e` exits 0 with no emulators running.** Every section then prints "fetch failed" and the process still ends with exit code 0. Its result only counts if the checks actually ran: look for `ok` lines and a non-zero passed count. The script was not changed.
+
+---
+
+## 8. Hosted demo (Vercel and Firebase)
+
+Links and setup: `hosted-demo.md`.
+
+| # | Area | Limitation | Source |
+|---|------|------------|--------|
+| H1 | Open mock login | The hosted functions run with `ALLOW_MOCK_AUTH=true`. Anyone who can reach the public URLs can sign in as any mock profile (including instructors and volunteers). Staff accounts still need a password. Data is fictional. Not acceptable for real use. | ADR-028 |
+| H2 | Weak staff passwords | Hosted staff passwords may be short demo values chosen by the owner (Firebase needs at least 6 characters). Anyone who learns them has admin or partner access to the demo data. Rotate or disable before any real use. | hosted setup |
+| H3 | Shared backend | Vercel PR previews and production use the same Firebase project. Actions in a preview change the shared demo data. Reseed to reset (`hosted-demo.md` section 5). | ADR-027 |
+| H4 | Check-in window | `DEMO_IGNORE_CHECKIN_WINDOW` is ignored outside emulators, so attendance on the hosted demo only works inside the real window (60 minutes before to 30 minutes after the start). | `config.ts` |
+| H5 | Not verified on hosted | Camera scanning, location, the offline ticket and file upload were not exercised on the hosted apps. Only login on both apps and the public callables were checked. | 2026-11-02 |
+| H6 | Manual deploys | Functions, rules and seed are deployed by hand with the Firebase CLI. Only the web and mobile builds deploy automatically from GitHub. A change in `functions/` or `firebase/` does not reach the hosted demo until someone runs the steps in `hosted-demo.md` section 5. | ADR-027 |
+| H7 | Billing | The Firebase project is on Blaze. Usage should stay in the free quota, but a budget alert is not configured by the repo. | hosted setup |
+| H8 | Mobile web only | The mobile app is hosted as a static web build (`expo export -p web`). Native-only features behave as on the mobile web preview. | `apps/mobile/vercel.json` |

@@ -6,14 +6,14 @@ login -> create workshop -> venue request and approval -> learner books -> QR ti
 
 It is built for the SC2006 SCSB project. Source requirements are in `SC2006_SCSB_SilverAcademy.pdf`; the use case mapping is in `docs/requirements-map.md`.
 
-Status: all planned build tasks are done and the two PDF mockup flows run on the Firebase emulators. Singpass is mocked, the venue map is schematic, and some areas have not been run on real devices. See `docs/known-limitations.md`.
+Status: all planned build tasks are done and the two PDF mockup flows run on the Firebase emulators. A hosted demo is also online (see **Hosted demo** below). Singpass is mocked, the venue map is schematic, and some areas have not been run on real devices. See `docs/known-limitations.md`.
 
 ## What it is made of
 
 - **Mobile app** (Expo, React Native) for Learner, Senior Instructor and Volunteer.
 - **Web app** (React, Vite) for Admin and Community Partner.
 - **Cloud Functions** (TypeScript) hold the business-critical rules as transactions: capacity, duplicate booking, single attendance, voucher redeem.
-- **Firebase** (Auth, Firestore, Storage) running on the **Local Emulator Suite**. Nothing uses real Firebase.
+- **Firebase** (Auth, Firestore, Storage) running on the **Local Emulator Suite** for development. The hosted demo uses a real Firebase project (`silveracademy-demo-adk`); local runs never touch it.
 - **Shared package** with types, enums, zod schemas and the map provider (OneMap or a stub).
 
 ## Quick start
@@ -39,7 +39,7 @@ Copy the values from `.env.example` into `functions/.env.local` and `apps/mobile
 
 ## Demo accounts
 
-Mobile users sign in through a fake Singpass screen: tap **Log in with Singpass**, then a demo account (for example `learner-35`, `senior-62`, `volunteer-28`). Staff sign in on the web app (`admin01`, `partner01`). The full table of profiles, seeded data and the demo script for the two PDF flows (Learner Booking Journey and Senior Instructor Check-In Flow), Partner approval and Admin voucher upload are in `docs/dev-guide.md`, sections 5 and 6.
+Mobile users sign in through a fake Singpass screen: tap **Log in with Singpass**, then a demo account (for example `learner-35`, `senior-62`, `volunteer-28`). Staff sign in on the web app (`admin01`, `partner01`). The same profiles exist on the hosted demo (see above). The full table of profiles, seeded data and the demo script for the two PDF flows (Learner Booking Journey and Senior Instructor Check-In Flow), Partner approval and Admin voucher upload are in `docs/dev-guide.md`, sections 5 and 6.
 
 ## Tests
 
@@ -72,20 +72,42 @@ firebase/        emulator config, firestore and storage rules, indexes, seed, ru
 docs/            coordination and documentation hub
 ```
 
+## Hosted demo
+
+Try it without installing anything. Singpass is mocked and the data is seeded demo data, so do not enter real personal details.
+
+| App                                                           | URL                                              |
+| ------------------------------------------------------------- | ------------------------------------------------ |
+| Staff web app (Admin, Community Partner), sign in at `/login` | https://silver-academy-web-adk7712.vercel.app    |
+| Mobile web app (Learner, Instructor, Volunteer)               | https://silver-academy-mobile-adk7712.vercel.app |
+
+- Mobile web: pick a profile in the mock Singpass picker (for example `learner-35`).
+- Staff web: user id `admin01` or `partner01`. Password: `<ask the project owner>` (not stored in the repo).
+- Backend: Firebase project `silveracademy-demo-adk` (Auth, Firestore, Storage, Cloud Functions in `asia-southeast1`).
+- Camera QR scanning, location and the offline ticket are not verified on the hosted apps. Use the manual ticket-code entry.
+
+Setup, environment variables, redeploy and reseed steps: `docs/hosted-demo.md`.
+
 ## Deployment
 
-The web app (`apps/web`, Vite + React) is hosted on Vercel Hobby. Config is in `vercel.json` (repo root).
+Both apps are hosted on Vercel Hobby, as two projects of one repository:
 
-- Project URL: https://silver-academy-web-adk7712.vercel.app (Admin and Community Partner web app only).
-- Every pull request gets a preview URL automatically, posted as a comment on the PR.
-- Pushes to `master` (the repo's default branch) deploy to production.
-- Only the web app is hosted. The mobile app and Firebase emulators still run locally, so a deployed web app has no backend until real Firebase config is added as Vercel environment variables.
+| Vercel project          | Root directory | Config                    | Production URL                                   |
+| ----------------------- | -------------- | ------------------------- | ------------------------------------------------ |
+| `silver-academy-web`    | `./`           | `vercel.json`             | https://silver-academy-web-adk7712.vercel.app    |
+| `silver-academy-mobile` | `apps/mobile`  | `apps/mobile/vercel.json` | https://silver-academy-mobile-adk7712.vercel.app |
+
+- Every pull request gets preview URLs automatically, posted as a comment on the PR by the Vercel bot. Previews share the hosted Firebase project with production.
+- Pushes to `master` (the default branch) deploy to production.
+- Client settings are Vercel environment variables (`VITE_*` for web, `EXPO_PUBLIC_*` for mobile). Without them the apps fall back to the local emulators. See `docs/hosted-demo.md`.
+- Cloud Functions, rules and the seed are deployed from a developer machine with the Firebase CLI, not by Vercel. Steps are in `docs/hosted-demo.md`.
 
 ## Documentation
 
 Start with **[docs/README.md](docs/README.md)**, the documentation index. Then:
 
 - `docs/dev-guide.md`: setup, demo script, troubleshooting and onboarding
+- `docs/hosted-demo.md`: hosted demo links, environment, redeploy and reseed
 - `docs/progress.md`: task status board
 - `docs/known-limitations.md`: open issues and unverified areas
 - `docs/next-steps.md`: prioritised work for the next developer
@@ -96,4 +118,4 @@ Start with **[docs/README.md](docs/README.md)**, the documentation index. Then:
 - The project guide for agents and developers is `CLAUDE.md`.
 - A task is done only when its handoff in `docs/handoffs/` is written and `docs/progress.md` and the checklists are updated.
 - Never commit or push without the owner's approval.
-- Demo credentials exist only in the emulator. Do not reuse the seed passwords anywhere else.
+- Demo credentials are for the emulator and the hosted demo only. Do not reuse the seed passwords anywhere else, and never commit the hosted staff passwords (they live in the git-ignored `.cloud-demo-credentials`).

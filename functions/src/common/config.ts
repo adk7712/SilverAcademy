@@ -6,12 +6,16 @@ const DEV_QR_SECRET = 'dev-only-change-me';
 export const isEmulator = (env: NodeJS.ProcessEnv = process.env): boolean =>
   env.FUNCTIONS_EMULATOR === 'true' || !!env.FIRESTORE_EMULATOR_HOST;
 
-/** `mock` in emulators by default; anywhere else it must be set explicitly (mock is refused outside emulators). */
+/** Mock auth runs in emulators, or on a hosted demo project that explicitly sets ALLOW_MOCK_AUTH=true. */
+export const mockAuthAllowed = (env: NodeJS.ProcessEnv = process.env): boolean =>
+  isEmulator(env) || env.ALLOW_MOCK_AUTH === 'true';
+
+/** `mock` in emulators by default; anywhere else it must be set explicitly and opted in with ALLOW_MOCK_AUTH. */
 export function authMode(env: NodeJS.ProcessEnv = process.env): AuthMode {
   const raw = env.AUTH_MODE ?? (isEmulator(env) ? 'mock' : 'singpass');
   if (raw !== 'mock' && raw !== 'singpass') throw new Error(`Invalid AUTH_MODE "${raw}"`);
-  if (raw === 'mock' && !isEmulator(env))
-    throw new Error('AUTH_MODE=mock is only allowed in the emulators');
+  if (raw === 'mock' && !mockAuthAllowed(env))
+    throw new Error('AUTH_MODE=mock is only allowed in the emulators or with ALLOW_MOCK_AUTH=true');
   return raw;
 }
 

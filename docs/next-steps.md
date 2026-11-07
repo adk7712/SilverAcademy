@@ -32,6 +32,10 @@ Start with `dev-guide.md` section 6 and run both demo flows, so you know the cur
 12. **Admin edits and denormalised copies** (B10). Decide whether title and description changes should update booking and request snapshots, or whether the snapshot wording should be shown in the UI.
 13. **Cancelling a workshop and volunteers** (B11). Mark assignments as WITHDRAWN on cancel, and tell volunteers.
 
+27. **Harden the hosted demo before anyone outside the course uses it** (H1, H2). Options: turn off `ALLOW_MOCK_AUTH` and gate the functions behind real sign-in, rotate the staff passwords, and add a Google Cloud budget alert (H7). Record the decision in `decisions.md`.
+28. **Automate hosted deploys** (H6). Add a CI job or workflow that deploys functions and rules to `silveracademy-demo-adk` on merge to `master`, using a service account stored as a GitHub secret. Until then, follow `hosted-demo.md` section 5 by hand.
+29. **Click through the hosted apps** (H5). Run Flow A and Flow B from `dev-guide.md` on https://silver-academy-mobile-adk7712.vercel.app and the staff flows on https://silver-academy-web-adk7712.vercel.app. Record the results in `checklists/use-case-coverage.md`.
+
 ## P3: polish, hardening and cleanup
 
 14. **Copy, icons and assets** (task 2.11, S15). Choose an icon set for the mobile tab bar; tidy the error strings across `strings/` and `i18n/`.

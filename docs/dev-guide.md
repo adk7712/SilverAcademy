@@ -2,6 +2,8 @@
 
 Everything a new developer needs to run SilverAcademy locally, walk through the two PDF mockup flows, and avoid the common traps. Start with the root `README.md` for the one-page overview, then come back here.
 
+The hosted demo (links, redeploy, reseed) is covered in `hosted-demo.md`; this guide is about local development on the emulators.
+
 Status of the prototype and what is not verified yet: `progress.md`, `checklists/use-case-coverage.md`, `known-limitations.md`.
 
 ---
@@ -74,9 +76,9 @@ Mobile and web are independent. The Learner, Instructor and Volunteer experience
 
 ---
 
-## 5. Demo accounts (emulator only)
+## 5. Demo accounts (emulator and hosted demo)
 
-Every account below exists only in the emulator.
+The accounts below are created by the seed. Locally they exist only in the emulator. The same profiles are seeded into the hosted demo (https://silver-academy-mobile-adk7712.vercel.app for mobile, https://silver-academy-web-adk7712.vercel.app for staff). Hosted staff passwords are not listed here: ask the project owner (`hosted-demo.md` section 2).
 
 ### Singpass users (mobile)
 
@@ -109,7 +111,7 @@ Staff sign in on the web app with their staff user id and password. Staff are no
 | `admin01` | `admin01@staff.silveracademy.test` | ADMIN | Accounts, workshops, voucher inventory, incident queue, instructor review |
 | `partner01` | `partner01@staff.silveracademy.test` | COMMUNITY_PARTNER | Owns 5 facilities (`Demo Hall Toa Payoh`, `Demo Room Bedok`, `Demo Studio Ang Mo Kio`, and the real `Ayer Rajah Community Club` and `Changi Simei Community Club`) and their slots; `ws-07` has a pending venue request |
 
-Staff passwords are the seed defaults in `firebase/seed/guard.ts`, or the `SEED_*` overrides you set. They are not secrets, but do not reuse them outside the emulator. Staff user ids are case-insensitive (lowercase on the server).
+Local staff passwords are the seed defaults in `firebase/seed/guard.ts`, or the `SEED_*` overrides you set. They are not secrets, but do not reuse them outside the emulator. Hosted staff passwords are set separately in Firebase Auth. Staff user ids are case-insensitive (lowercase on the server).
 
 ### Other seeded data
 
@@ -236,7 +238,7 @@ Feature modules (mobile and web and functions): `auth`, `workshops`, `bookings`,
 2. **`functions/.env.local` needs `DEMO_IGNORE_CHECKIN_WINDOW=true`** for the e2e run and for the check-in demo. Without it, attendance outside the window fails with SESSION_NOT_ACTIVE. The flag is honoured only in emulators (`functions/src/common/config.ts`), so it has no effect in a real deploy. The shipped examples default to `false`. Restart the emulators after changing the file.
 3. **Clear the Expo cache when Metro serves stale code.** After edits, if the app shows old behaviour, run `npm run dev:mobile -- -c` (equivalent to `expo start -c`). This happened during 2.1.
 4. **`expo start` rewrites `apps/mobile/tsconfig.json`.** Run Prettier afterwards: `npx prettier --write apps/mobile/tsconfig.json`, or `npm run format` to fix everything.
-5. **No real Singpass.** `AUTH_MODE=mock` is the only working mode. `AUTH_MODE=singpass` returns SINGPASS_UNAVAILABLE. The mock refuses to run outside the emulators. Do not try to connect a real Singpass account.
+5. **No real Singpass.** `AUTH_MODE=mock` is the only working mode. `AUTH_MODE=singpass` returns SINGPASS_UNAVAILABLE. The mock refuses to run outside the emulators unless `ALLOW_MOCK_AUTH=true` is set (ADR-028); only the hosted demo sets it. Do not try to connect a real Singpass account.
 6. **Ports are shared.** The emulators, `npm run test:emulator` and `npm run e2e` all need ports 8080, 9099, 9199 and 4000/5001. If a run says "port taken", find the holder with `lsof -i :8080` and stop it. Kill stray `java` processes left by crashed emulator runs.
 7. **Camera scanning is untested on devices.** It needs a physical phone, or HTTPS/localhost on web. Use the manual ticket-code entry in simulators.
 8. **Offline ticket on cold start.** Cached claims let the ticket open when the ID token has expired and the device is offline (review H2 fix). Not verified on a device yet.
@@ -255,6 +257,8 @@ Feature modules (mobile and web and functions): `auth`, `workshops`, `bookings`,
 | `npm run seed` exits with a refusal message | One of the two `*_EMULATOR_HOST` variables is missing, or the project id does not start with `demo-`. Use the exact command in section 3. |
 | `npm run emulators` fails with "port taken" | Another emulator run is still going. Stop it, or kill the holder of the port. |
 | Login says "Invalid Credentials" for staff | Wrong staff id or password, or the emulators were reseeded with new `SEED_*` values. Reseed with the same values. |
+| Hosted staff login says "Invalid Credentials" with the right password | Firebase accepted the password but `auth-recordStaffLogin` failed. Check Cloud Logging for `auth-recordstafflogin` and see `hosted-demo.md` section 6. |
+| Hosted mobile login fails with a permission error on signing | The functions service account lacks `roles/iam.serviceAccountTokenCreator` (`hosted-demo.md` section 5). |
 | Login says "Account suspended" | The account was suspended in a test. Log in as `admin01`, open Accounts, and reactivate it. |
 | Callable returns `INTERNAL` after an admin suspend or reactivate | The Auth step failed after the Firestore commit. Retry the same action: SUSPEND on a suspended user and REACTIVATE on an active one now re-apply only the Auth state (review M1 fix). Check the audit entry with `authSyncFailed`. |
 | Mobile shows an old screen after edits | Metro cache. `npm run dev:mobile -- -c`. |
@@ -273,4 +277,5 @@ Feature modules (mobile and web and functions): `auth`, `workshops`, `bookings`,
 4. Run the demo: Flow A, then Flow B. This takes about 20 minutes once the emulators are up.
 5. Read `docs/known-limitations.md` before you change anything in a flagged area, and `docs/next-steps.md` for the priority list.
 6. Each feature folder has a `README.md`. For a backend change, follow the recipe in `docs/handoffs/1.1-auth-infra.md`.
-7. Rule for agents and humans: a task is done only when its handoff is written and `progress.md` and the checklists are updated. Never commit or push without the owner's approval.
+7. To show the prototype to someone else, send them the hosted links from `hosted-demo.md` section 1.
+8. Rule for agents and humans: a task is done only when its handoff is written and `progress.md` and the checklists are updated. Never commit or push without the owner's approval.
