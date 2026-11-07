@@ -1,7 +1,7 @@
 // Learner shell tabs: Discover, My Bookings, Report, Profile. Screens are owned by the feature in the comment.
 import { useMemo } from 'react';
-import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../design';
 import { strings } from '../i18n';
 import { DiscoverScreen, WorkshopDetailScreen } from '../features/workshops';
@@ -22,7 +22,8 @@ const MyBookingsStack = createStack([
 
 export function LearnerTabs() {
   const theme = useTheme();
-  const options = useMemo(() => tabScreenOptions(theme), [theme]);
+  const { bottom } = useSafeAreaInsets();
+  const options = useMemo(() => tabScreenOptions(theme, bottom), [theme, bottom]);
   return (
     <Tab.Navigator screenOptions={options}>
       <Tab.Screen
@@ -30,9 +31,6 @@ export function LearnerTabs() {
         component={DiscoverStack}
         options={{
           title: strings.nav.tabs.discover,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search-outline" size={size} color={color} />
-          ),
         }}
       />
 
@@ -41,9 +39,6 @@ export function LearnerTabs() {
         component={MyBookingsStack}
         options={{
           title: strings.nav.tabs.myBookings,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" size={size} color={color} />
-          ),
         }}
       />
 
@@ -52,9 +47,6 @@ export function LearnerTabs() {
         component={ReportStack}
         options={{
           title: strings.nav.tabs.report,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="alert-circle-outline" size={size} color={color} />
-          ),
         }}
       />
 
@@ -63,9 +55,6 @@ export function LearnerTabs() {
         component={ProfileStack}
         options={{
           title: strings.nav.tabs.profile,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
-          ),
         }}
       />
     </Tab.Navigator>

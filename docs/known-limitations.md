@@ -44,7 +44,7 @@ Read this before you demo the app or change one of the flagged areas. Priority o
 | S12 | Notifications | In-app notifications only (ADR-016). Notifications are fetched once on Profile mount, last 20 items, with no pull-to-refresh. | 2.6, ADR-016 |
 | S13 | Ticket and voucher display | Vouchers are shown as large text only; there is no barcode library. Wallet tier selection is visual only. | 2.5 |
 | S14 | Mode switching | A user with VOLUNTEER plus LEARNER only sees the Learner shell; the server never produces that combination. Text size is local only (not synced to `prefs.fontScale`). | 2.1 |
-| S15 | Icons and copy | No icon set is installed; tab bars are text labels. Copy is English only, in `strings/` and `i18n/en/`. Task 2.11 covers polish. | 2.1, 2.11 |
+| S15 | Icons and copy | Mobile tab bars use Ionicons (`@expo/vector-icons`); other screens have no icons. Copy is English only, in `strings/` and `i18n/en/`. Task 2.11 covers polish. | 2.1, 2.11 |
 | S16 | Fake Singpass password | The password field is cosmetic. It must be non-empty, but it is never checked, stored, sent or logged. There is no real Singpass check to test. | F |
 
 ---

@@ -1,7 +1,7 @@
 // Volunteer shell tabs: Opportunities, Assigned, Scan, Profile (Profile holds logout and Report an issue).
 import { useMemo } from 'react';
-import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../design';
 import { strings } from '../i18n';
 import {
@@ -26,7 +26,8 @@ const ScanStack = createStack([{ name: 'VolunteerScan', component: ScanAttendanc
 
 export function VolunteerTabs() {
   const theme = useTheme();
-  const options = useMemo(() => tabScreenOptions(theme), [theme]);
+  const { bottom } = useSafeAreaInsets();
+  const options = useMemo(() => tabScreenOptions(theme, bottom), [theme, bottom]);
   return (
     <Tab.Navigator screenOptions={options}>
       <Tab.Screen
@@ -34,9 +35,6 @@ export function VolunteerTabs() {
         component={OpportunitiesStack}
         options={{
           title: strings.nav.tabs.opportunities,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search-outline" size={size} color={color} />
-          ),
         }}
       />
 
@@ -45,9 +43,6 @@ export function VolunteerTabs() {
         component={AssignedStack}
         options={{
           title: strings.nav.tabs.assigned,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="clipboard-outline" size={size} color={color} />
-          ),
         }}
       />
 
@@ -56,9 +51,6 @@ export function VolunteerTabs() {
         component={ScanStack}
         options={{
           title: strings.nav.tabs.scan,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="scan-outline" size={size} color={color} />
-          ),
         }}
       />
 
@@ -67,9 +59,6 @@ export function VolunteerTabs() {
         component={ProfileStack}
         options={{
           title: strings.nav.tabs.profile,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
-          ),
         }}
       />
     </Tab.Navigator>
