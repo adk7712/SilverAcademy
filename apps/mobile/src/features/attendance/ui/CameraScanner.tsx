@@ -10,7 +10,8 @@ const CAMERA_HEIGHT = 320;
 
 interface Props {
   onCode: (raw: string) => void;
-  onUseManual: () => void;
+  /** Called when the camera cannot start, so the owner falls back to the session code. */
+  onUseManual?: (() => void) | undefined;
 }
 
 export function CameraScanner({ onCode, onUseManual }: Props) {
@@ -34,7 +35,6 @@ export function CameraScanner({ onCode, onUseManual }: Props) {
         ) : Platform.OS !== 'web' ? (
           <Button label={s.openSettings} onPress={() => void Linking.openSettings()} />
         ) : null}
-        <Button label={s.useCode} variant="secondary" onPress={onUseManual} />
       </View>
     );
   }

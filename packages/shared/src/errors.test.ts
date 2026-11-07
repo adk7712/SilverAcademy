@@ -19,7 +19,7 @@ describe('errors', () => {
     expect(httpsCodeFor('UNAUTHENTICATED')).toBe('unauthenticated');
     expect(httpsCodeFor('ACCOUNT_SUSPENDED')).toBe('permission-denied');
     expect(httpsCodeFor('REASON_REQUIRED')).toBe('invalid-argument');
-    expect(httpsCodeFor('TICKET_NOT_FOUND')).toBe('not-found');
+    expect(httpsCodeFor('TIER_NOT_FOUND')).toBe('not-found');
     expect(httpsCodeFor('ALREADY_ATTENDED')).toBe('already-exists');
     expect(httpsCodeFor('OUT_OF_STOCK')).toBe('resource-exhausted');
     expect(httpsCodeFor('MAP_UNAVAILABLE')).toBe('unavailable');

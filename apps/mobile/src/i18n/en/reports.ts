@@ -37,5 +37,8 @@ export const reports = {
     CLOSED: 'Closed',
   },
   infoRequested: 'Admin asked: {text}',
+  infoResponded: 'You replied: {text}',
+  replyLabel: 'Your reply',
+  replySend: 'Send reply',
   resolution: 'Outcome: {text}',
 } as const;

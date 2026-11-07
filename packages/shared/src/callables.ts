@@ -88,6 +88,11 @@ export const CALLABLES = {
     input: attendance.recordAttendanceInput,
     output: attendance.recordAttendanceOutput,
   },
+  'attendance-setCheckInCode': {
+    input: attendance.setCheckInCodeInput,
+    output: attendance.setCheckInCodeOutput,
+  },
+  'attendance-checkIn': { input: attendance.checkInInput, output: attendance.checkInOutput },
 
   'venues-upsertFacility': {
     input: venues.upsertFacilityInput,
@@ -135,6 +140,10 @@ export const CALLABLES = {
   'reports-updateIncident': {
     input: reports.updateIncidentInput,
     output: reports.updateIncidentOutput,
+  },
+  'reports-respondToIncident': {
+    input: reports.respondToIncidentInput,
+    output: reports.respondToIncidentOutput,
   },
 } as const;
 

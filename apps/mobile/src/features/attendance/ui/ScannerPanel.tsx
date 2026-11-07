@@ -1,13 +1,12 @@
-// UC #1-4 #3-4 scanner for one workshop: camera or manual code, result banner, haptic feedback.
+// UC #1-4 #3-4 scanner for one workshop: camera or session code (owner only), result banner, haptic feedback.
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { AppText, Button, useTheme } from '../../../design';
+import { AppText, Button, SubmitField, useTheme, useToast } from '../../../design';
 import { format, strings } from '../../../i18n';
-import { useScanController } from '../controller/useScanController';
+import { saveSessionCode, useScanController } from '../controller/useScanController';
 import type { ScanWorkshop } from '../types';
 import { CameraScanner } from './CameraScanner';
-import { ManualEntry } from './ManualEntry';
 import { ScanResultBanner } from './ScanResultBanner';
 
 const s = strings.attendanceScan;
@@ -29,8 +28,11 @@ interface Props {
 
 export function ScannerPanel({ workshop, onChangeWorkshop }: Props) {
   const { spacing } = useTheme();
-  const { state, onBarcode, submitManual, reset } = useScanController(workshop.id);
+  const toast = useToast();
+  const { state, onBarcode, reset } = useScanController(workshop.id);
   const [manual, setManual] = useState(false);
+  // Only the instructor may set the session code; volunteers scan.
+  const useCode = workshop.source === 'OWNED' ? () => setManual(true) : undefined;
 
   useEffect(() => {
     if (state.phase === 'result') void buzz(state.outcome.status === 'success');
@@ -43,13 +45,24 @@ export function ScannerPanel({ workshop, onChangeWorkshop }: Props) {
         <ScanResultBanner outcome={state.outcome} source={workshop.source} onNext={reset} />
       ) : manual ? (
         <>
-          <ManualEntry busy={state.phase === 'submitting'} onSubmit={submitManual} />
+          <SubmitField
+            label={s.codeLabel}
+            helper={s.codeHint}
+            submitLabel={s.saveCode}
+            minLength={4}
+            onSubmit={async (code) => {
+              const error = await saveSessionCode(workshop.id, code);
+              if (!error) toast.show(format(s.codeSaved, { code: code.toUpperCase() }), 'success');
+              return error;
+            }}
+            testID="session-code-input"
+          />
           <Button label={s.useCamera} variant="secondary" onPress={() => setManual(false)} />
         </>
       ) : (
         <>
-          <CameraScanner onCode={onBarcode} onUseManual={() => setManual(true)} />
-          <Button label={s.useCode} variant="secondary" onPress={() => setManual(true)} />
+          <CameraScanner onCode={onBarcode} onUseManual={useCode} />
+          {useCode ? <Button label={s.useCode} variant="secondary" onPress={useCode} /> : null}
         </>
       )}
       {onChangeWorkshop ? (

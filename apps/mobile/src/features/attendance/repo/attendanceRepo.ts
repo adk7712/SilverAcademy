@@ -12,6 +12,9 @@ export async function recordAttendance(
   return callFunction('attendance-recordAttendance', { workshopId, ...input });
 }
 
+export const setCheckInCode = (workshopId: string, code: string) =>
+  callFunction('attendance-setCheckInCode', { workshopId, code });
+
 type TimestampLike = { toMillis?: () => number } | null | undefined;
 const toMs = (t: unknown): number | null => {
   const ts = t as TimestampLike;

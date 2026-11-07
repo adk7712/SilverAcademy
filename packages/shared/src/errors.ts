@@ -42,7 +42,7 @@ const CODES = {
   ],
   Attendance: [
     'INVALID_QR',
-    'TICKET_NOT_FOUND',
+    'CHECKIN_CODE_INVALID',
     'WRONG_WORKSHOP',
     'NO_BOOKING',
     'ALREADY_ATTENDED',
@@ -133,7 +133,7 @@ const HTTPS_GROUPS: Record<Exclude<HttpsCode, 'failed-precondition'>, readonly A
     'ATTACHMENT_INVALID',
     'UPLOAD_TOO_LARGE',
   ],
-  'not-found': ['NOT_FOUND', 'TICKET_NOT_FOUND', 'TIER_NOT_FOUND'],
+  'not-found': ['NOT_FOUND', 'TIER_NOT_FOUND'],
   'already-exists': [
     'ALREADY_BOOKED',
     'ALREADY_ATTENDED',

@@ -1,6 +1,5 @@
-// UC #2-3 ViewTicket: high-contrast QR, manual-fallback ticket code, attendance status; cached for offline (ADR-019).
+// UC #2-3 ViewTicket: high-contrast QR, session-code check-in fallback, attendance status; cached for offline (ADR-019).
 import { View } from 'react-native';
-import { formatTicketCode } from '@silveracademy/shared';
 import {
   AppText,
   Badge,
@@ -9,6 +8,7 @@ import {
   ErrorBanner,
   LoadingState,
   Screen,
+  SubmitField,
   useTheme,
 } from '../../../../design';
 import { format, strings } from '../../../../i18n';
@@ -20,10 +20,10 @@ import { useLearnerBookings } from '../../controller/useLearnerBookings';
 import { QrCodeView } from './QrCodeView';
 
 export function TicketScreen() {
-  const { spacing } = useTheme();
   const s = strings.bookingsLearner;
+  const { spacing } = useTheme();
   const { bookingId } = useAppRoute<'Ticket'>().params;
-  const { bookings, loading, error, cachedAt, reload, cancelling, cancelError, cancel } =
+  const { bookings, loading, error, cachedAt, reload, cancelling, cancelError, cancel, checkIn } =
     useLearnerBookings();
   const booking = bookings.find((b) => b.id === bookingId);
 
@@ -50,18 +50,19 @@ export function TicketScreen() {
         {valid ? (
           <>
             <QrCodeView value={booking.qrPayload} label={s.qrLabel} />
-            <Card>
-              <AppText variant="title">{s.ticketCodeTitle}</AppText>
-              <AppText
-                variant="display"
-                selectable
-                accessibilityLabel={`${s.ticketCodeTitle} ${formatTicketCode(booking.ticketCode).split('').join(' ')}`}
-                style={{ letterSpacing: 4, textAlign: 'center' }}
-              >
-                {formatTicketCode(booking.ticketCode)}
-              </AppText>
-              <AppText color="textMuted">{s.ticketCodeHelp}</AppText>
-            </Card>
+            {booking.status === 'CONFIRMED' && !cachedAt ? (
+              <Card>
+                <AppText variant="title">{s.sessionCodeTitle}</AppText>
+                <SubmitField
+                  label={s.sessionCodeLabel}
+                  helper={s.sessionCodeHelp}
+                  submitLabel={s.sessionCodeSubmit}
+                  minLength={4}
+                  onSubmit={(code) => checkIn(booking.id, code)}
+                  testID="session-code-input"
+                />
+              </Card>
+            ) : null}
           </>
         ) : (
           <ErrorBanner message={s.cancelledNote} />

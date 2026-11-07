@@ -1,6 +1,7 @@
 // UC #1-4 #3-4 scan flow hook: debounce, QR pre-check, submit, result state, auto-reset after success.
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { recordAttendance } from '../repo/attendanceRepo';
+import { errorOrNull } from '../../../services/errors/errorMessage';
+import { recordAttendance, setCheckInCode } from '../repo/attendanceRepo';
 import type { ScanInput } from '../types';
 import {
   INITIAL_GATE,
@@ -53,14 +54,6 @@ export function useScanController(workshopId: string) {
     [state.phase, submit],
   );
 
-  const submitManual = useCallback(
-    (code: string) => {
-      const ticketCode = code.trim();
-      if (ticketCode) void submit({ ticketCode });
-    },
-    [submit],
-  );
-
   const reset = useCallback(() => dispatch({ type: 'RESET' }), []);
 
   useEffect(() => {
@@ -69,5 +62,9 @@ export function useScanController(workshopId: string) {
     return () => clearTimeout(t);
   }, [state, reset]);
 
-  return { state, onBarcode, submitManual, reset };
+  return { state, onBarcode, reset };
 }
+
+/** The instructor sets the session code that learners type on their ticket to check in (ADR-030). */
+export const saveSessionCode = (workshopId: string, code: string) =>
+  errorOrNull(setCheckInCode(workshopId, code));

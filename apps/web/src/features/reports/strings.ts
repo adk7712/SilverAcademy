@@ -39,6 +39,7 @@ export const reportStrings = {
     created: 'Reported',
     updated: 'Last updated',
     infoRequest: 'Information requested',
+    infoResponse: 'Reporter reply',
     resolution: 'Resolution',
     attachments: 'Attachments',
     noAttachments: 'No attachments.',

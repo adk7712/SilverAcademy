@@ -7,7 +7,6 @@ import { describeBookFailure, type BookFailure } from './learnerDetailLogic';
 
 export interface BookedInfo {
   bookingId: string;
-  ticketCode: string;
   seatsRemaining: number;
 }
 
@@ -45,7 +44,6 @@ export function useLearnerWorkshopDetail(workshopId: string) {
       const out = await bookWorkshop(workshopId);
       setBooked({
         bookingId: out.bookingId,
-        ticketCode: out.ticketCode,
         seatsRemaining: out.seatsRemaining,
       });
       reload();

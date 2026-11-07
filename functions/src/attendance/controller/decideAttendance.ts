@@ -43,11 +43,6 @@ export interface AttendanceDecision {
   pointsAwarded: number;
 }
 
-/** Which input path was used: QR payload or manual ticket code (#1-4 Ex4). */
-export const methodOf = (
-  input: { qrPayload: string } | { ticketCode: string },
-): AttendanceMethod => ('qrPayload' in input ? 'QR' : 'MANUAL');
-
 const toIso = (t: TimestampLike | undefined | null): string | undefined =>
   t ? t.toDate().toISOString() : undefined;
 

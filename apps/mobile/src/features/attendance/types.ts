@@ -14,7 +14,6 @@ export interface ScanWorkshop {
 
 export type ScanErrorKind =
   | 'INVALID_QR'
-  | 'TICKET_NOT_FOUND'
   | 'WRONG_WORKSHOP'
   | 'NO_BOOKING'
   | 'ALREADY_ATTENDED'
@@ -44,4 +43,4 @@ export interface ScanFailure {
 
 export type ScanOutcome = ScanSuccess | ScanFailure;
 
-export type ScanInput = { qrPayload: string } | { ticketCode: string };
+export type ScanInput = { qrPayload: string };

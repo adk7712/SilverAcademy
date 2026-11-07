@@ -382,11 +382,11 @@ Common to all: implemented with `db.runTransaction` (Admin SDK; all reads before
 - Format: `SA1.<bookingId>.<sig>`; `sig = base64url(HMAC_SHA256(QR_HMAC_SECRET, "SA1." + bookingId))` truncated to 22 chars (~128 bits). Regex: `^SA1\.([A-Za-z0-9_]{1,128})\.([A-Za-z0-9_-]{22})$`.
 - `QR_HMAC_SECRET` is a functions-only env var (`functions/.env.local`, dev default for emulators). Signing and verifying live only in `functions/src/common/qrSigner.ts` (verify with `crypto.timingSafeEqual`). `packages/shared` only has `parseQrPayload` (format check) for instant client-side "not a SilverAcademy code" feedback.
 - Properties: editing any character breaks the signature (`INVALID_QR`); payload carries no personal data beyond ids; replay of a valid code is harmless because attendance is once-only; version prefix allows key rotation (`SA2`). A screenshot of a ticket is a bearer token; staff see the learner's name in the confirmation to eyeball identity.
-- Manual fallback (#1-4 Ex4): staff enter `ticketCode` (displayed as `XXXX-XXXX`) for the currently selected workshop. Normalise: uppercase, strip `-`/spaces, `O→0`, `I/L→1`. Lookup `bookings where workshopId == W and ticketCode == C` (0 → `TICKET_NOT_FOUND`, >1 → `TICKET_NOT_FOUND`, practically impossible).
+- Manual fallback (#1-4 Ex4, ADR-030): the instructor sets a session code (`attendance-setCheckInCode`, stored in `checkInCodes/{workshopId}`); the learner types it on their ticket (`attendance-checkIn`). A wrong code is `CHECKIN_CODE_INVALID`. Staff no longer type ticket codes.
 
 ### 4.3 Record attendance — `attendance-recordAttendance` (UC #1-4, #3-4; FR 2.7-2.10, 4.7-4.8; NFR 3.2, 4.3)
-- Input: `{ workshopId, qrPayload } | { workshopId, ticketCode }` (zod discriminated by which key is present).
-- Pre (outside tx): `requireCaller(roles: [SENIOR_INSTRUCTOR, VOLUNTEER])`. If `qrPayload`: `qrSigner.verify` → `INVALID_QR`; extract `bookingId`. If `ticketCode`: query → `bookingId` or `TICKET_NOT_FOUND`.
+- Input: `{ workshopId, qrPayload }`.
+- Pre (outside tx): `requireCaller(roles: [SENIOR_INSTRUCTOR, VOLUNTEER])`; `qrSigner.verify` → `INVALID_QR`; extract `bookingId`. `attendance-checkIn` (LEARNER) instead checks own booking and the session code, then runs the same tx.
 - Tx reads: `workshops/{workshopId}`, `bookings/{bookingId}`, `attendance/{bookingId}`, `volunteerAssignments/{workshopId}_{uid}` (only if caller is not the instructor), `wallets/{workshop.instructorId}`.
 - `decideAttendance(...)` order:
   1. workshop missing → `NOT_FOUND`

@@ -30,6 +30,7 @@ export const COL = {
   venueRequests: 'venueRequests',
   bookings: 'bookings',
   attendance: 'attendance',
+  checkInCodes: 'checkInCodes',
   volunteerAssignments: 'volunteerAssignments',
   feedback: 'feedback',
   wallets: 'wallets',

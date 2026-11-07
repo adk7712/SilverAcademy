@@ -92,6 +92,7 @@ export function ReportIssueScreen() {
         reports={c.reports}
         error={c.reportsError}
         onRetry={() => void c.reloadReports()}
+        onReply={c.reply}
       />
     </Screen>
   );

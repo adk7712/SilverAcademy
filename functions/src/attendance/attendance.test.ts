@@ -13,7 +13,6 @@ import { fixedClock, runCallable } from '../common';
 import {
   decideAttendance,
   isSessionActive,
-  methodOf,
   type AttendanceRequest,
   type AttendanceSnapshots,
 } from './controller/decideAttendance';
@@ -81,13 +80,6 @@ const codeOf = (fn: () => unknown) => {
   }
   return 'NO_ERROR';
 };
-
-describe('methodOf', () => {
-  it('QR for qrPayload, MANUAL for ticketCode', () => {
-    expect(methodOf({ qrPayload: 'x' })).toBe('QR');
-    expect(methodOf({ ticketCode: 'x' })).toBe('MANUAL');
-  });
-});
 
 describe('decideAttendance: success', () => {
   it('instructor scan: SI role, 1 point to the instructor', () => {
@@ -246,7 +238,7 @@ describe('attendance-recordAttendance wrapper', () => {
       code: 'PERMISSION_DENIED',
     });
   });
-  it('both qrPayload and ticketCode -> INVALID_INPUT', async () => {
+  it('an extra ticketCode -> INVALID_INPUT', async () => {
     await expect(
       run(['VOLUNTEER'], { workshopId: W, qrPayload: 'x', ticketCode: 'y' }),
     ).rejects.toMatchObject({ code: 'INVALID_INPUT' });

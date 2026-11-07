@@ -35,7 +35,7 @@ export const errorStrings: Record<AppErrorCode, string> & { NETWORK: string } = 
   ALREADY_BOOKED: 'Already booked.',
   CANNOT_BOOK_OWN_WORKSHOP: 'You cannot book your own workshop.',
   INVALID_QR: 'Invalid QR code.',
-  TICKET_NOT_FOUND: 'Ticket not found.',
+  CHECKIN_CODE_INVALID: 'Wrong session code.',
   WRONG_WORKSHOP: 'This ticket is for a different workshop.',
   NO_BOOKING: 'No booking found.',
   ALREADY_ATTENDED: 'Attendance was already recorded.',

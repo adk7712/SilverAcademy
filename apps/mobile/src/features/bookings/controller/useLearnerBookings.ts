@@ -2,10 +2,11 @@
 import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSession } from '../../auth';
-import { errorMessage } from '../../../services/errors/errorMessage';
+import { errorMessage, errorOrNull } from '../../../services/errors/errorMessage';
 import {
   cacheTickets,
   cancelOwnBooking,
+  checkInWithCode,
   fetchOwnBookings,
   readCachedTickets,
 } from '../repo/learnerBookingRepo';
@@ -21,6 +22,8 @@ export interface LearnerBookingsState {
   cancelling: boolean;
   cancelError: string | null;
   cancel: (workshopId: string) => Promise<boolean>;
+  /** Check in with the instructor's session code (ADR-030). Resolves to an error message, or null. */
+  checkIn: (bookingId: string, code: string) => Promise<string | null>;
 }
 
 export function useLearnerBookings(): LearnerBookingsState {
@@ -106,5 +109,10 @@ export function useLearnerBookings(): LearnerBookingsState {
     [uid, saveBookings],
   );
 
-  return { bookings, loading, error, cachedAt, reload, cancelling, cancelError, cancel };
+  const checkIn = useCallback(
+    (bookingId: string, code: string) => errorOrNull(checkInWithCode(bookingId, code).then(reload)),
+    [reload],
+  );
+
+  return { bookings, loading, error, cachedAt, reload, cancelling, cancelError, cancel, checkIn };
 }

@@ -97,7 +97,7 @@ export function WorkshopDetailScreen() {
         {d.booked ? (
           <Card>
             <AppText variant="title">{s.confirmedTitle}</AppText>
-            <AppText>{format(s.confirmedBody, { code: d.booked.ticketCode })}</AppText>
+            <AppText>{s.confirmedBody}</AppText>
             <Button label={s.viewTicket} onPress={() => viewTicket(d.booked!.bookingId)} />
           </Card>
         ) : null}

@@ -4,8 +4,6 @@ import {
   INITIAL_DISCOVER_STATE,
   computeDiscover,
   isFiltered,
-  parseDateInput,
-  validateDates,
   venuePins,
 } from './learnerDiscoverLogic';
 import { bookBlockReason, describeBookFailure } from './learnerDetailLogic';
@@ -33,23 +31,6 @@ const ws = (id: string, over: Partial<Workshop> = {}): Workshop =>
 const now = new Date('2026-11-01T00:00:00Z');
 const S = INITIAL_DISCOVER_STATE;
 
-describe('parseDateInput', () => {
-  it('parses real dates in Singapore time', () => {
-    expect(parseDateInput('2026-11-10', false)?.toISOString()).toBe('2026-11-09T16:00:00.000Z');
-    expect(parseDateInput('2026-11-10', true)?.toISOString()).toBe('2026-11-10T15:59:59.000Z');
-  });
-  it('rejects bad input', () => {
-    expect(parseDateInput('', false)).toBeNull();
-    expect(parseDateInput('2026-02-31', false)).toBeNull();
-    expect(parseDateInput('10/11/2026', false)).toBeNull();
-  });
-  it('flags invalid and reversed ranges', () => {
-    expect(validateDates({ from: 'x', to: '' }).from).toBe(true);
-    expect(validateDates({ from: '2026-12-01', to: '2026-11-01' }).order).toBe(true);
-    expect(validateDates({ from: '', to: '' })).toEqual({ from: false, to: false, order: false });
-  });
-});
-
 describe('computeDiscover', () => {
   const items = [
     ws('far', {
@@ -74,15 +55,15 @@ describe('computeDiscover', () => {
     const fallback = computeDiscover(items, { ...S, sort: 'NEAREST' }, null, now).results;
     expect(fallback[0]?.id).toBe('cook');
   });
-  it('filters by keyword, category and date range', () => {
+  it('filters by keyword, category and date window', () => {
     expect(
       computeDiscover(items, { ...S, keyword: 'laksa' }, null, now).results.map((w) => w.id),
     ).toEqual(['cook']);
     expect(computeDiscover(items, { ...S, category: 'COOKING' }, null, now).results).toHaveLength(
       1,
     );
-    const range = computeDiscover(items, { ...S, from: '2026-11-13', to: '2026-11-14' }, null, now);
-    expect(range.results.map((w) => w.id)).toEqual(['near']);
+    const window = computeDiscover(items, { ...S, days: 11 }, null, now);
+    expect(window.results.map((w) => w.id)).toEqual(['cook']);
     expect(computeDiscover(items, { ...S, keyword: 'zzz' }, null, now).results).toEqual([]);
   });
   it('recommends only when unfiltered, skipping full workshops', () => {

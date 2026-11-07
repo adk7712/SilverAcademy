@@ -418,25 +418,24 @@ async function main(): Promise<void> {
   });
 
   // ---- Volunteer opt-in + scan
-  await section('Volunteer opt-in + scan (manual code)', async () => {
+  await section('Volunteer opt-in + learner check-in by session code', async () => {
     const vol = await singpassLogin('volunteer-28');
-    await expectError(
-      'attendance-recordAttendance',
-      { workshopId, ticketCode: 'ZZZZZZZZ' },
-      vol.token,
-      'TICKET_NOT_FOUND',
-    );
     const optIn = await ok('workshops-optInVolunteer', { workshopId }, vol.token);
     check('opt-in ASSIGNED', optIn.status === 'ASSIGNED', optIn);
     await expectError('workshops-optInVolunteer', { workshopId }, vol.token, 'ALREADY_OPTED_IN');
     const learner2 = await singpassLogin('senior-49-edge');
     const b2 = await ok('bookings-bookWorkshop', { workshopId }, learner2.token);
-    const scan = await ok(
-      'attendance-recordAttendance',
-      { workshopId, ticketCode: String(b2.ticketCode) },
+    const entry = { bookingId: String(b2.bookingId), code: 'sun42' };
+    await expectError('attendance-checkIn', entry, learner2.token, 'CHECKIN_CODE_INVALID');
+    await expectError(
+      'attendance-setCheckInCode',
+      { workshopId, code: 'SUN42' },
       vol.token,
+      'PERMISSION_DENIED',
     );
-    check('volunteer manual scan records MANUAL', scan.method === 'MANUAL', scan);
+    await ok('attendance-setCheckInCode', { workshopId, code: 'SUN42' }, senior.token);
+    const scan = await ok('attendance-checkIn', entry, learner2.token);
+    check('learner check-in by session code records MANUAL', scan.method === 'MANUAL', scan);
     const roster = await ok('bookings-getRoster', { workshopId }, vol.token);
     check(
       'volunteer reads roster, 2 attended',

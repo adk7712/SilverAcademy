@@ -278,7 +278,11 @@ describe('workshops-adminSetStatus (emulator)', () => {
       status: 'CANCELLED',
       cancelReason: 'Storm',
       seatsTaken: 1,
+      volunteersAssigned: 0,
     });
+    expect((await db.doc(`volunteerAssignments/${f.wid}_vol`).get()).data()?.status).toBe(
+      'WITHDRAWN',
+    );
     expect((await db.doc(`bookings/${a}`).get()).data()?.status).toBe('CANCELLED');
     expect((await db.doc(`bookings/${b}`).get()).data()?.status).toBe('CANCELLED');
     expect((await db.doc(`bookings/${attended}`).get()).data()?.status).toBe('ATTENDED');

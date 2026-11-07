@@ -79,6 +79,12 @@ export function IncidentDetail() {
                 <dd>{incident.infoRequest}</dd>
               </>
             )}
+            {incident.infoResponse && (
+              <>
+                <dt>{d.infoResponse}</dt>
+                <dd>{incident.infoResponse}</dd>
+              </>
+            )}
             {incident.resolution && (
               <>
                 <dt>{d.resolution}</dt>

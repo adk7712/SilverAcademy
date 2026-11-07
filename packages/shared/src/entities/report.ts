@@ -30,6 +30,7 @@ export interface Incident extends Timestamps, Versioned {
   status: IncidentStatus;
   resolution?: string;
   infoRequest?: string;
+  infoResponse?: string;
 }
 
 export interface Notification {

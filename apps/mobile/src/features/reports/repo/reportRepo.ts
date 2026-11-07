@@ -18,6 +18,9 @@ export async function submitReport(input: {
   return out.referenceNo;
 }
 
+export const respondToIncident = (incidentId: string, response: string) =>
+  callFunction('reports-respondToIncident', { incidentId, response });
+
 export async function listMyReports(uid: string): Promise<MyReport[]> {
   const snap = await getDocs(
     query(
@@ -34,6 +37,7 @@ export async function listMyReports(uid: string): Promise<MyReport[]> {
       status: data.status,
       createdAt: data.createdAt?.toDate?.() ?? null,
       infoRequest: data.infoRequest,
+      infoResponse: data.infoResponse,
       resolution: data.resolution,
     };
   });

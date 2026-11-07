@@ -1,5 +1,5 @@
-// UC #2-5 "my reports": reference numbers with status so a report stays trackable.
-import { AppText, Badge, Card, ErrorBanner, type BadgeTone } from '../../../design';
+// UC #2-5 "my reports": reference numbers with status, and a reply when the admin asks for information.
+import { AppText, Badge, Card, ErrorBanner, SubmitField, type BadgeTone } from '../../../design';
 import { format, strings } from '../../../i18n';
 import type { MyReport } from '../reportTypes';
 
@@ -16,10 +16,12 @@ export function MyReportsList({
   reports,
   error,
   onRetry,
+  onReply,
 }: {
   reports: MyReport[];
   error: string | null;
   onRetry: () => void;
+  onReply: (referenceNo: string, text: string) => Promise<string | null>;
 }) {
   return (
     <>
@@ -37,6 +39,18 @@ export function MyReportsList({
           <Badge label={t.status[r.status]} tone={TONE[r.status]} />
           {r.infoRequest ? (
             <AppText>{format(t.infoRequested, { text: r.infoRequest })}</AppText>
+          ) : null}
+          {r.infoResponse ? (
+            <AppText>{format(t.infoResponded, { text: r.infoResponse })}</AppText>
+          ) : null}
+          {r.status === 'AWAITING_INFO' ? (
+            <SubmitField
+              label={t.replyLabel}
+              submitLabel={t.replySend}
+              multiline
+              onSubmit={(text) => onReply(r.referenceNo, text)}
+              testID={`report-reply-${r.referenceNo}`}
+            />
           ) : null}
           {r.resolution ? <AppText>{format(t.resolution, { text: r.resolution })}</AppText> : null}
         </Card>

@@ -76,7 +76,6 @@ describe('outcomeFromError', () => {
     expect(kindOf('INVALID_QR')).toBe('INVALID_QR');
     expect(kindOf('WRONG_WORKSHOP')).toBe('WRONG_WORKSHOP');
     expect(kindOf('NO_BOOKING')).toBe('NO_BOOKING');
-    expect(kindOf('TICKET_NOT_FOUND')).toBe('TICKET_NOT_FOUND');
     expect(kindOf('SESSION_NOT_ACTIVE')).toBe('WINDOW_CLOSED');
     expect(kindOf('NOT_AUTHORISED_FOR_WORKSHOP')).toBe('NOT_AUTHORISED');
     expect(kindOf('WORKSHOP_FULL')).toBe('OTHER');

@@ -3,12 +3,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { LatLng, Workshop } from '@silveracademy/shared';
 import { errorMessage } from '../../../services/errors/errorMessage';
 import { fetchOpenWorkshops } from '../repo/learnerWorkshopRepo';
-import { getDeviceLocation } from '../repo/learnerLocationRepo';
+import { geocodePostal, getDeviceLocation } from '../repo/learnerLocationRepo';
 import {
   INITIAL_DISCOVER_STATE,
   computeDiscover,
   isFiltered,
-  validateDates,
   type DiscoverSort,
   type DiscoverState,
 } from './learnerDiscoverLogic';
@@ -52,7 +51,8 @@ export function useLearnerDiscover() {
         return;
       }
       setLocationNotice('locating');
-      const loc = await getDeviceLocation();
+      const postal = filters.postal.trim();
+      const loc = postal ? await geocodePostal(postal) : await getDeviceLocation();
       if (loc.status === 'ok') {
         setOrigin(loc.origin);
         update({ sort: 'NEAREST' });
@@ -63,14 +63,13 @@ export function useLearnerDiscover() {
         setLocationNotice(loc.status);
       }
     },
-    [update],
+    [update, filters.postal],
   );
 
   const reset = useCallback(() => {
-    setFilters((f) => ({ ...INITIAL_DISCOVER_STATE, sort: f.sort }));
+    setFilters((f) => ({ ...INITIAL_DISCOVER_STATE, sort: f.sort, postal: f.postal }));
   }, []);
 
-  const dateErrors = validateDates(filters);
   const computed = useMemo(
     () => computeDiscover(items, filters, origin, new Date()),
     [items, filters, origin],
@@ -81,7 +80,6 @@ export function useLearnerDiscover() {
     update,
     setSort,
     reset,
-    dateErrors,
     filtered: isFiltered(filters),
     loading,
     error,

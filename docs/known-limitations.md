@@ -32,10 +32,10 @@ Hosted-demo limits are in section 8. Read this before you demo the app or change
 |---|------|------------|--------|
 | S1 | Singpass | **Singpass is mocked** (ADR-001). `AUTH_MODE=mock` is the only working mode. `AUTH_MODE=singpass` returns `SINGPASS_UNAVAILABLE`. The fake Singpass screen is a UI demo; the mock verifier only runs in the emulator. Singpass logins are not audited. | 1.1, dev-guide, F |
 | S2 | Map | Learner Discover (list/map toggle) and workshop detail show an **OpenStreetMap tile map** with venue pins. It is a static view fitted to the pins, with no pan or zoom, and it falls back to the list if every tile fails (a few missing tiles show as blank squares). It is not run on a device yet. The instructor venue picker is still a **schematic pin plot**, and the web venue form takes numeric coordinates. OSM tiles suit a demo, not production traffic (OSM tile usage policy). | 2.3, 2.8, G |
-| S3 | Learner location | "Selected location" by postal code (ADR-018) is not built. Only device location is used for "Nearest". | 2.2 |
-| S4 | Date filter | The Discover date range is a text field (YYYY-MM-DD), not a date picker. No date-picker library is installed. | 2.2 |
+| S3 | Learner location | "Nearest" uses a typed postal code (geocoded with MapProvider) or the device location. With the stub map provider only the fixture postal codes resolve. | 2.2, ADR-018 |
+| S4 | Date filter | The Discover date filter is three choices (any date, next 7 days, next 30 days). There is no custom range and no date-picker library. | 2.2 |
 | S5 | Feedback | Feedback (#2-4) is built on mobile with a fixed tag list. Its use case was marked "deferred" in the first `functions.md` draft, and that marking is now stale. | 2.6 |
-| S6 | Reporter reply | A reporter cannot answer an AWAITING_INFO request (L7). The app shows the request but has no reply action. Spec gap #5-3. | review L7 |
+| S6 | Reporter reply | A reporter answers an AWAITING_INFO request with `reports-respondToIncident` (one reply field, back to UNDER_REVIEW). The admin is not notified; the reply shows on the incident page. | review L7 |
 | S7 | Curriculum review | Built as a workshop status (ADR-029): approve or cancel. There is no separate "requires revision" state. | ADR-029 |
 | S8 | Organisation onboarding | No use case for CP organisation onboarding (requirements-map gap; ADR-021). Partner and admin accounts are created by seed or the admin callable. | ADR-021 |
 | S9 | Profile resubmission | Instructor profile resubmission is supported (REJECTED or REQUIRES_REVISION), but it is not in any use case. | ADR-021 |
@@ -55,7 +55,7 @@ Hosted-demo limits are in section 8. Read this before you demo the app or change
 
 | # | Finding | Status | Impact |
 |---|---------|--------|--------|
-| SEC1 | **H1 hardening.** The roster no longer shows ticket codes (fixed). An instructor can still type a learner's code verbally and award points through the manual path. Ideas not done: points only for `method: 'QR'`, or cap MANUAL check-ins per workshop and flag them for admin review. | Partly fixed | An instructor can take points for a learner who is absent, if the learner gives the code. |
+| SEC1 | **H1 hardening.** Staff can no longer type a ticket code. The fallback is a session code that the learner types on their own phone (ADR-030). A shared code or a forwarded QR screenshot still checks in an absent learner, and code attempts are not rate limited. | Partly fixed | An instructor colluding with a learner can still take a point. |
 | SEC2 | **M2 rules window.** Firestore and Storage rules trust the `status` claim. A suspended user keeps rules-based reads (own bookings, wallet, notifications, report uploads) for up to 1 hour. Callables block them immediately. | Accepted (ADR-025) | Data-read exposure for up to 1 h after suspension. |
 | SEC3 | **M1 residual.** The suspend and reactivate Auth step runs after the Firestore commit (cannot be in the transaction). A failure returns INTERNAL while `users.status` is already changed. A retry now re-runs only the Auth step (fixed), but an admin must know to retry. | Partly fixed | Auth state can lag the Firestore status until a retry succeeds. |
 | SEC4 | **M3 server-side audit.** `recordStaffLogin` FAILURE and BLOCKED are client-reported and rate-limited (5 per minute per known id, 10 per minute for unknown ids, 60 overall). Server-side sign-in audit needs Identity Platform blocking functions, which need a real project. | Partly fixed | Failed real sign-ins are not logged server-side; audit entries for failures are client-reported. |
@@ -81,13 +81,13 @@ H1 (roster no longer returns ticket codes), H2 (offline claims fallback), M1 (id
 | B2 | Booking | Ticket code uniqueness within a workshop is probabilistic (40 bits, not enforced). Attendance uses a query that expects exactly one match. | 1.2, 1.3 |
 | B3 | Booking | A CANCELLED booking still blocks rebooking (ALREADY_BOOKED). Learners cannot cancel their own bookings (ADR-013). | 1.2, 2.2 |
 | B4 | Contention | Under very high contention a transaction can run out of attempts and return BUSY_TRY_AGAIN. Not seen with 20 parallel calls on the emulator. | 1.2 |
-| B5 | Attendance | Ticket lookup runs before the staff check, so an unassigned staff member can tell TICKET_NOT_FOUND from NOT_AUTHORISED_FOR_WORKSHOP for a workshop id. Acceptable for the prototype. | 1.3 |
+| B5 | Attendance | The session code is checked before the check-in window, so a learner with a booking can tell a wrong code from a closed session. Acceptable for the prototype. | ADR-030 |
 | B6 | Attendance | The workshop `version` is not bumped by attendance, so admin edits during a session do not hit STALE_VERSION. | 1.3 |
 | B7 | Venues | `adminUpdateWorkshop` can raise capacity above the venue capacity on an OPEN workshop (L3 related, deferred). | review L3, 1.7 |
 | B8 | Venues | Facility capacity edits do not re-validate existing requests or workshops. | 1.5 |
 | B9 | Venues | Slot overlap query assumes slots are at most `MAX_SLOT_HOURS` long. | 1.5 |
 | B10 | Admin edits | Title, description and category edits do not update copies in `bookings.workshopSnapshot`, `venueRequests.workshopSummary` or workshop-derived notifications. Bookings keep the title from booking time. | 1.7, 2.9 |
-| B11 | Cancellation | Cancelling a workshop does not mark `volunteerAssignments` as WITHDRAWN, and it does not refund anything. | 1.7 |
+| B11 | Cancellation | Cancelling a workshop marks its `volunteerAssignments` as WITHDRAWN and notifies the volunteers. It does not refund anything. | 1.7 |
 | B12 | Incidents | `incidentId` on `adminSetStatus` is recorded in the audit only; its existence is not checked. `submitReport` does not check that `relatedWorkshopId` or `relatedUserId` exist. | 1.7 |
 | B13 | Incidents | `updateIncident` accepts a text-only update on an open incident. `reporterRole` is the first of LEARNER, SENIOR_INSTRUCTOR, VOLUNTEER the caller holds. | 1.7 |
 | B14 | Preferences | `updatePreferences` with a `lastMode` not held returns INVALID_INPUT (`fieldErrors.lastMode`), which the function catalogue does not list. | 1.7 |

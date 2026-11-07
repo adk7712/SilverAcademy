@@ -1,8 +1,9 @@
-// Emulator integration test for attendance-recordAttendance (UC #1-4, #3-4). Run via `npm run test:emulator`.
+// Emulator integration test for the attendance callables (UC #1-4, #3-4). Run via `npm run test:emulator`.
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { Timestamp, getFirestore } from 'firebase-admin/firestore';
 import type { Role, User } from '@silveracademy/shared';
 import { signQr } from '../common';
+import { checkIn, setCheckInCode } from './handlers/checkInCode';
 import { recordAttendance } from './handlers/recordAttendance';
 
 if (getApps().length === 0) initializeApp({ projectId: process.env.GCLOUD_PROJECT });
@@ -50,7 +51,7 @@ async function setup() {
       ticketCode,
       qrPayload: signQr(id),
     });
-    return { id, qr: signQr(id), ticketCode };
+    return { id, qr: signQr(id), learner };
   };
   const b1 = await booking(w, `${p}-l1`, 'ABCD1234');
   const b2 = await booking(w, `${p}-l2`, 'WXYZ5678');
@@ -68,7 +69,7 @@ async function setup() {
 const caller = (uid: string, roles: Role[]) => ({ uid, roles, user: { uid, roles } as User });
 const scan = (
   who: ReturnType<typeof caller>,
-  input: { workshopId: string; qrPayload: string } | { workshopId: string; ticketCode: string },
+  input: { workshopId: string; qrPayload: string },
   opts: { ignoreCheckInWindow?: boolean; now?: Date } = {},
 ) =>
   recordAttendance(
@@ -128,19 +129,61 @@ describe('attendance-recordAttendance (emulator)', () => {
     ]);
   });
 
-  it('assigned volunteer, manual ticket code (formatted): points go to the instructor, none to the volunteer', async () => {
+  it('assigned volunteer scan: points go to the instructor, none to the volunteer', async () => {
     const s = await setup();
-    const res = await scan(caller(s.vol, ['VOLUNTEER']), {
-      workshopId: s.w,
-      ticketCode: 'abcd-1234',
-    });
-    expect(res).toMatchObject({ bookingId: s.b1.id, method: 'MANUAL', pointsAwarded: 1 });
+    const res = await scan(caller(s.vol, ['VOLUNTEER']), { workshopId: s.w, qrPayload: s.b1.qr });
+    expect(res).toMatchObject({ bookingId: s.b1.id, method: 'QR', pointsAwarded: 1 });
     expect((await db.doc(`attendance/${s.b1.id}`).get()).data()?.scannedByRole).toBe('VOLUNTEER');
     expect((await wallet(s.si))?.balance).toBe(1);
     expect(await wallet(s.vol)).toBeUndefined();
   });
 
-  it('distinct errors: INVALID_QR, TICKET_NOT_FOUND, WRONG_WORKSHOP, NO_BOOKING, ALREADY_ATTENDED', async () => {
+  it('session code: only the instructor sets it; a learner checks in own booking with the right code', async () => {
+    const s = await setup();
+    const set = (uid: string, code: string) =>
+      setCheckInCode({
+        input: { workshopId: s.w, code },
+        caller: caller(uid, ['SENIOR_INSTRUCTOR']),
+        db,
+        now: NOW,
+      });
+    const enter = (uid: string, bookingId: string, code: string, now = NOW) =>
+      checkIn(
+        { input: { bookingId, code }, caller: caller(uid, ['LEARNER']), db, now },
+        { ignoreCheckInWindow: false },
+      );
+    await expect(enter(s.b1.learner, s.b1.id, 'SUN42')).rejects.toMatchObject({
+      code: 'CHECKIN_CODE_INVALID',
+    });
+    await expect(set('someone-else', 'SUN42')).rejects.toMatchObject({
+      code: 'NOT_AUTHORISED_FOR_WORKSHOP',
+    });
+    await set(s.si, 'SUN42');
+    await expect(enter(s.b1.learner, s.b1.id, 'MOON1')).rejects.toMatchObject({
+      code: 'CHECKIN_CODE_INVALID',
+    });
+    await expect(enter(s.b2.learner, s.b1.id, 'SUN42')).rejects.toMatchObject({
+      code: 'NO_BOOKING',
+    });
+    await expect(
+      enter(s.b1.learner, s.b1.id, 'SUN42', new Date('2026-10-21T00:00:00Z')),
+    ).rejects.toMatchObject({ code: 'SESSION_NOT_ACTIVE' });
+    await expect(enter(s.b1.learner, s.b1.id, 'SUN42')).resolves.toMatchObject({
+      bookingId: s.b1.id,
+      method: 'MANUAL',
+      pointsAwarded: 1,
+    });
+    await expect(enter(s.b1.learner, s.b1.id, 'SUN42')).rejects.toMatchObject({
+      code: 'ALREADY_ATTENDED',
+    });
+    expect((await wallet(s.si))?.balance).toBe(1);
+    const audit = await db.collection('auditLogs').where('details.bookingId', '==', s.b1.id).get();
+    expect(audit.docs.map((d) => d.data())).toEqual([
+      expect.objectContaining({ actorId: s.b1.learner, actorRole: 'LEARNER' }),
+    ]);
+  });
+
+  it('distinct errors: INVALID_QR, WRONG_WORKSHOP, NO_BOOKING, ALREADY_ATTENDED', async () => {
     const s = await setup();
     const si = caller(s.si, ['SENIOR_INSTRUCTOR']);
     const tampered = s.b1.qr.slice(0, -1) + (s.b1.qr.endsWith('A') ? 'B' : 'A');
@@ -149,12 +192,6 @@ describe('attendance-recordAttendance (emulator)', () => {
     });
     await expect(scan(si, { workshopId: s.w, qrPayload: 'hello' })).rejects.toMatchObject({
       code: 'INVALID_QR',
-    });
-    await expect(scan(si, { workshopId: s.w, ticketCode: 'ZZZZ9999' })).rejects.toMatchObject({
-      code: 'TICKET_NOT_FOUND',
-    });
-    await expect(scan(si, { workshopId: s.w, ticketCode: '???' })).rejects.toMatchObject({
-      code: 'TICKET_NOT_FOUND',
     });
     await expect(scan(si, { workshopId: s.w, qrPayload: s.bOther.qr })).rejects.toMatchObject({
       code: 'WRONG_WORKSHOP',
@@ -166,7 +203,7 @@ describe('attendance-recordAttendance (emulator)', () => {
       code: 'NO_BOOKING',
     });
     await scan(si, { workshopId: s.w, qrPayload: s.b2.qr });
-    await expect(scan(si, { workshopId: s.w, ticketCode: s.b2.ticketCode })).rejects.toMatchObject({
+    await expect(scan(si, { workshopId: s.w, qrPayload: s.b2.qr })).rejects.toMatchObject({
       code: 'ALREADY_ATTENDED',
       details: { learnerName: expect.any(String), attendedAt: NOW.toISOString() },
     });
@@ -196,13 +233,13 @@ describe('attendance-recordAttendance (emulator)', () => {
     );
   });
 
-  it('concurrent double scan of one ticket (SI by QR, volunteer by code, repeats): one attendance, one point', async () => {
+  it('concurrent double scan of one ticket (SI and volunteer, repeats): one attendance, one point', async () => {
     const s = await setup();
     const si = caller(s.si, ['SENIOR_INSTRUCTOR']);
     const vol = caller(s.vol, ['VOLUNTEER']);
     const results = await Promise.allSettled([
       scan(si, { workshopId: s.w, qrPayload: s.b1.qr }),
-      scan(vol, { workshopId: s.w, ticketCode: s.b1.ticketCode }),
+      scan(vol, { workshopId: s.w, qrPayload: s.b1.qr }),
       scan(si, { workshopId: s.w, qrPayload: s.b1.qr }),
       scan(vol, { workshopId: s.w, qrPayload: s.b1.qr }),
     ]);

@@ -6,11 +6,12 @@ import {
   type IncidentCategory,
 } from '@silveracademy/shared';
 import { format, strings } from '../../../i18n';
-import { errorMessage } from '../../../services/errors/errorMessage';
+import { errorMessage, errorOrNull } from '../../../services/errors/errorMessage';
 import { useSession } from '../../auth';
 import {
   deleteAttachment,
   listMyReports,
+  respondToIncident,
   submitReport,
   uploadAttachment,
 } from '../repo/reportRepo';
@@ -128,6 +129,10 @@ export function useReportIssue() {
     }
   };
 
+  /** Answers an AWAITING_INFO request. */
+  const reply = (referenceNo: string, text: string) =>
+    errorOrNull(respondToIncident(referenceNo, text).then(loadReports));
+
   const reset = () => {
     setReferenceNo(null);
     setCategory(null);
@@ -157,5 +162,6 @@ export function useReportIssue() {
     submit,
     reset,
     reloadReports: loadReports,
+    reply,
   };
 }
