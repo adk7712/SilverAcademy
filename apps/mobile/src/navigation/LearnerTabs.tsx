@@ -1,6 +1,5 @@
 // Learner shell tabs: Discover, My Bookings, Report, Profile. Screens are owned by the feature in the comment.
 import { useMemo } from 'react';
-import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from '../design';
 import { strings } from '../i18n';
@@ -25,49 +24,26 @@ export function LearnerTabs() {
   const options = useMemo(() => tabScreenOptions(theme), [theme]);
   return (
     <Tab.Navigator screenOptions={options}>
-  <Tab.Screen
-    name="DiscoverTab"
-    component={DiscoverStack}
-    options={{
-      title: strings.nav.tabs.discover,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="search-outline" size={size} color={color} />
-      ),
-    }}
-  />
-
-  <Tab.Screen
-    name="MyBookingsTab"
-    component={MyBookingsStack}
-    options={{
-      title: strings.nav.tabs.myBookings,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="calendar-outline" size={size} color={color} />
-      ),
-    }}
-  />
-
-  <Tab.Screen
-    name="ReportTab"
-    component={ReportStack}
-    options={{
-      title: strings.nav.tabs.report,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="alert-circle-outline" size={size} color={color} />
-      ),
-    }}
-  />
-
-  <Tab.Screen
-    name="ProfileTab"
-    component={ProfileStack}
-    options={{
-      title: strings.nav.tabs.profile,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="person-outline" size={size} color={color} />
-      ),
-    }}
-  />
-</Tab.Navigator>
+      <Tab.Screen
+        name="DiscoverTab"
+        component={DiscoverStack}
+        options={{ title: strings.nav.tabs.discover }}
+      />
+      <Tab.Screen
+        name="MyBookingsTab"
+        component={MyBookingsStack}
+        options={{ title: strings.nav.tabs.myBookings }}
+      />
+      <Tab.Screen
+        name="ReportTab"
+        component={ReportStack}
+        options={{ title: strings.nav.tabs.report }}
+      />
+      <Tab.Screen
+        name="ProfileTab"
+        component={ProfileStack}
+        options={{ title: strings.nav.tabs.profile }}
+      />
+    </Tab.Navigator>
   );
 }

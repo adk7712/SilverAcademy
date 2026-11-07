@@ -1,6 +1,5 @@
 // Volunteer shell tabs: Opportunities, Assigned, Scan, Profile (Profile holds logout and Report an issue).
 import { useMemo } from 'react';
-import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from '../design';
 import { strings } from '../i18n';
@@ -29,49 +28,22 @@ export function VolunteerTabs() {
   const options = useMemo(() => tabScreenOptions(theme), [theme]);
   return (
     <Tab.Navigator screenOptions={options}>
-  <Tab.Screen
-    name="OpportunitiesTab"
-    component={OpportunitiesStack}
-    options={{
-      title: strings.nav.tabs.opportunities,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="search-outline" size={size} color={color} />
-      ),
-    }}
-  />
-
-  <Tab.Screen
-    name="AssignedTab"
-    component={AssignedStack}
-    options={{
-      title: strings.nav.tabs.assigned,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="clipboard-outline" size={size} color={color} />
-      ),
-    }}
-  />
-
-  <Tab.Screen
-    name="ScanTab"
-    component={ScanStack}
-    options={{
-      title: strings.nav.tabs.scan,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="scan-outline" size={size} color={color} />
-      ),
-    }}
-  />
-
-  <Tab.Screen
-    name="ProfileTab"
-    component={ProfileStack}
-    options={{
-      title: strings.nav.tabs.profile,
-      tabBarIcon: ({ color, size }) => (
-        <Ionicons name="person-outline" size={size} color={color} />
-      ),
-    }}
-  />
-</Tab.Navigator>
+      <Tab.Screen
+        name="OpportunitiesTab"
+        component={OpportunitiesStack}
+        options={{ title: strings.nav.tabs.opportunities }}
+      />
+      <Tab.Screen
+        name="AssignedTab"
+        component={AssignedStack}
+        options={{ title: strings.nav.tabs.assigned }}
+      />
+      <Tab.Screen name="ScanTab" component={ScanStack} options={{ title: strings.nav.tabs.scan }} />
+      <Tab.Screen
+        name="ProfileTab"
+        component={ProfileStack}
+        options={{ title: strings.nav.tabs.profile }}
+      />
+    </Tab.Navigator>
   );
 }
