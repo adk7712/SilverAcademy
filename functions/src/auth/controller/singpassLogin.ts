@@ -2,8 +2,10 @@
 import { createHash } from 'node:crypto';
 import {
   AppError,
+  MOCK_SUSPENDED_PROFILE_ID,
   SENIOR_MIN_AGE,
   ageInYears,
+  findMockProfile,
   type RegisterAs,
   type Role,
   type SingpassIdentity,
@@ -22,6 +24,8 @@ export interface SingpassLoginInput {
   existing: Pick<User, 'roles' | 'status'> | undefined;
   registerAs: RegisterAs | undefined;
   now: Date;
+  /** True when the mock verifier is active (AUTH_MODE=mock). Enables the suspended-demo no-register guard. */
+  mockMode?: boolean;
 }
 
 export interface SingpassLoginDecision {
@@ -30,9 +34,15 @@ export interface SingpassLoginDecision {
   seniorEligible: boolean;
 }
 
+/** Mock mode only: the `suspended-demo` identity with no user doc may never register (a wiped doc stays suspended). */
+const isUnseededSuspendedMock = (input: SingpassLoginInput): boolean =>
+  input.mockMode === true &&
+  !input.existing &&
+  input.identity.sub === findMockProfile(MOCK_SUSPENDED_PROFILE_ID)?.sub;
+
 /**
  * Check order: DOB unreadable -> PROFILE_UNAVAILABLE; existing but status != ACTIVE -> ACCOUNT_SUSPENDED;
- * new and no registerAs -> REGISTRATION_REQUIRED.
+ * mock-mode `suspended-demo` with no user doc -> ACCOUNT_SUSPENDED (never registers); new and no registerAs -> REGISTRATION_REQUIRED.
  * New: LEARNER (+ SENIOR_INSTRUCTOR when age >= SENIOR_MIN_AGE) or VOLUNTEER.
  * Existing: SENIOR_INSTRUCTOR is added/removed to match eligibility for users holding LEARNER; other roles are kept.
  */
@@ -41,6 +51,7 @@ export function decideSingpassLogin(input: SingpassLoginInput): SingpassLoginDec
   if (age === null) throw new AppError('PROFILE_UNAVAILABLE');
   const seniorEligible = age >= SENIOR_MIN_AGE;
 
+  if (isUnseededSuspendedMock(input)) throw new AppError('ACCOUNT_SUSPENDED');
   if (!input.existing) {
     if (!input.registerAs) throw new AppError('REGISTRATION_REQUIRED');
     const roles: Role[] = [input.registerAs];

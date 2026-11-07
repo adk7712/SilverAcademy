@@ -32,7 +32,7 @@ Spec control classes are per role; ours are per feature. Mapping: LearnerControl
 | auth | Singpass login, registration choice, mode toggle | Staff login, route guards | `auth/` exchangeSingpass, recordStaffLogin; `SingpassVerifier` | Role, AccountStatus, mock Singpass profile fixtures, `AuthProvider` types |
 | users | Instructor profile submit, preferences (font scale) | Manage Accounts, Instructor Review | `users/` | User, InstructorProfile types/enums |
 | workshops | Create workshop, directory/search, details, volunteer opportunities/assist, feedback | Manage Workshops | `workshops/` (CRUD, admin status, volunteers, feedback) | Workshop types, categories, `filterWorkshops`, `recommendWorkshops`, `isCheckInWindowOpen` |
-| bookings | Book, My Bookings, Digital Ticket (offline cache), roster view | (reads only for admin) | `bookings/` bookWorkshop, getRoster | Booking types, ticket code normaliser |
+| bookings | Book, My Bookings, Digital Ticket (offline cache), roster view | (reads only for admin) | `bookings/` bookWorkshop, cancelBooking, getRoster | Booking types, ticket code normaliser |
 | attendance | Scanner + manual ticket code entry (SI and Volunteer) | none | `attendance/` recordAttendance | Attendance types, QR payload parser (format only) |
 | vouchers | Wallet, points history, redeem, my vouchers | Voucher Inventory, upload | `vouchers/` | Wallet, LedgerEntry, VoucherTier types, code normaliser/validator |
 | venues | Venue map/list, slot picker, request status | Facilities, availability, venue requests | `venues/` | Facility, TimeSlot, VenueRequest types, `MapProvider` interface + OneMap/stub implementations, `haversineKm` |
@@ -376,7 +376,7 @@ Common to all: implemented with `db.runTransaction` (Admin SDK; all reads before
 - `ticketCode` = 8 random Crockford base32 chars (crypto); `qrPayload` = `qrSigner.sign(bookingId)`.
 - Output `{ bookingId, ticketCode, qrPayload, workshopSnapshot (ISO times), seatsRemaining }`.
 - Concurrency: every booking reads and writes the same workshop doc, so Firestore serialises them; a loser re-runs and sees the new `seatsTaken`. Deterministic booking id makes duplicate requests (double tap, two devices) collide on `tx.create`. Capacity cannot be exceeded. Test: 20 parallel calls on capacity 5 → exactly 5 `CONFIRMED`, 15 `WORKSHOP_FULL`; same learner twice in parallel → 1 success, 1 `ALREADY_BOOKED`.
-- No learner cancellation in the prototype (ADR-013).
+- Learner cancellation (ADR-026): `bookings-cancelBooking({ workshopId })` requires LEARNER and derives `${workshopId}_${uid}`. Tx reads booking and workshop, checks ownership, and accepts already CANCELLED as a no-write retry. Otherwise requires CONFIRMED, OPEN workshop, and current `startAt > now`; writes booking CANCELLED and `seatsTaken - 1` (floor zero) together. Retains the ticket; attendance rejects it. Rebooking remains disallowed.
 
 ### 4.2 QR payload format (tamper resistance)
 - Format: `SA1.<bookingId>.<sig>`; `sig = base64url(HMAC_SHA256(QR_HMAC_SECRET, "SA1." + bookingId))` truncated to 22 chars (~128 bits). Regex: `^SA1\.([A-Za-z0-9_]{1,128})\.([A-Za-z0-9_-]{22})$`.
@@ -484,16 +484,17 @@ export interface SingpassVerifier {
 }
 
 export interface MockSingpassProfile extends SingpassIdentity {
-  profileId: string;          // e.g. 'learner-35', 'senior-62', 'senior-50', 'volunteer-28', 'senior-49-edge'
-  label: string;              // shown on the mock login picker
+  profileId: string;          // e.g. 'learner-35', 'senior-62', 'senior-50', 'volunteer-28', 'senior-49-edge', 'suspended-demo'
+  label: string;              // shown on the fake Singpass screen
   suggestedRegisterAs: RegisterAs;
 }
 export const MOCK_SINGPASS_PROFILES: readonly MockSingpassProfile[]; // packages/shared/src/auth/mockSingpassProfiles.ts
 // Special profileIds: 'FAIL' → SINGPASS_AUTH_FAILED, 'DOWN' → SINGPASS_UNAVAILABLE (demo the exceptions).
+// 'suspended-demo' (`MOCK_SUSPENDED_PROFILE_ID` in shared) is seeded SUSPENDED → login returns ACCOUNT_SUSPENDED.
 ```
 
 Login sequence (mobile): `authProvider.authenticate()` → `call auth-exchangeSingpass({ assertion, registerAs? })` → `signInWithCustomToken(customToken)` → `getIdTokenResult()` for `roles` → show mode toggle iff roles include both LEARNER and SENIOR_INSTRUCTOR. If the response is `REGISTRATION_REQUIRED` the app shows "Join as Learner / Volunteer" and repeats the call with `registerAs`.
-Server (`auth-exchangeSingpass`): verifier selected by env `AUTH_MODE` (`mock` in emulators; `MockSingpassVerifier` refuses to run otherwise). `uid = 'sp_' + sha256(sub).slice(0, 20)`. Age = full years from `dateOfBirth` at `now` (SG time). New user: roles `LEARNER` (+ `SENIOR_INSTRUCTOR` if age >= `SENIOR_MIN_AGE`) or `VOLUNTEER`; create `users` doc. Existing user: refresh `seniorEligible`/SI role; status not ACTIVE → `ACCOUNT_SUSPENDED`. Set claims; `createCustomToken(uid, claims)`.
+Server (`auth-exchangeSingpass`): verifier selected by env `AUTH_MODE` (`mock` in emulators; `MockSingpassVerifier` refuses to run otherwise). `uid = 'sp_' + sha256(sub).slice(0, 20)`. Age = full years from `dateOfBirth` at `now` (SG time). New user: roles `LEARNER` (+ `SENIOR_INSTRUCTOR` if age >= `SENIOR_MIN_AGE`) or `VOLUNTEER`; create `users` doc. Existing user: refresh `seniorEligible`/SI role; status not ACTIVE → `ACCOUNT_SUSPENDED`. Mock mode only: the `suspended-demo` identity with no user doc → `ACCOUNT_SUSPENDED` (never registers). Set claims; `createCustomToken(uid, claims)`.
 
 Staff login (web, not an external service): Firebase email/password with email `${userId}@staff.silveracademy.test` (Firebase Auth hashes passwords: NFR 1.3). Then `auth-recordStaffLogin({ userId, outcome })` for audit. `auth/user-disabled` → "Account suspended, contact the platform team" and outcome `BLOCKED`. Wrong credentials → clear form, generic "Invalid Credentials. Access Denied", outcome `FAILURE`.
 

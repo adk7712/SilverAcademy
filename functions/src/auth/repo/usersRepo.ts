@@ -15,7 +15,13 @@ export interface LoginResult extends SingpassLoginDecision {
  */
 export function loginTransaction(
   db: Firestore,
-  args: { uid: string; identity: SingpassIdentity; registerAs: RegisterAs | undefined; now: Date },
+  args: {
+    uid: string;
+    identity: SingpassIdentity;
+    registerAs: RegisterAs | undefined;
+    now: Date;
+    mockMode?: boolean;
+  },
 ): Promise<LoginResult> {
   const ref = db.collection(COL.users).doc(args.uid);
   return runTx(db, async (tx) => {
@@ -26,6 +32,7 @@ export function loginTransaction(
       existing,
       registerAs: args.registerAs,
       now: args.now,
+      mockMode: args.mockMode,
     });
     const ageVerifiedAt = Timestamp.fromDate(args.now);
     if (!existing) {

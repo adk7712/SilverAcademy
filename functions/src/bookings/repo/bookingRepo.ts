@@ -3,6 +3,7 @@ import { randomBytes } from 'node:crypto';
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 import type { Booking, Workshop } from '@silveracademy/shared';
 import { ids, notifyTx, paths, refs, runTx, signQr, type Caller } from '../../common';
+import { decideCancellation } from '../controller/decideCancellation';
 import { decideBooking } from '../controller/decideBooking';
 import { generateTicketCode, type RandomBytes } from '../controller/ticketCode';
 
@@ -70,5 +71,35 @@ export async function createBooking(
       workshopSnapshot: d.workshopSnapshot,
       seatsRemaining: d.seatsRemaining,
     };
+  });
+}
+
+/** Update the retained ticket and release its seat in one serializable transaction. */
+export async function cancelBooking(
+  db: Firestore,
+  caller: Pick<Caller, 'uid'>,
+  workshopId: string,
+  now: Date,
+): Promise<{ bookingId: string; status: 'CANCELLED' }> {
+  const bookingId = ids.booking(workshopId, caller.uid);
+  const bookingRef = refs.bookings(db).doc(bookingId);
+  const workshopRef = refs.workshops(db).doc(workshopId);
+  return runTx(db, async (tx) => {
+    const [bookingSnap, workshopSnap] = await Promise.all([
+      tx.get(bookingRef),
+      tx.get(workshopRef),
+    ]);
+    const seatsTaken = decideCancellation(bookingSnap.data(), workshopSnap.data(), caller.uid, now);
+    if (seatsTaken !== null) {
+      tx.update(bookingRef, {
+        status: 'CANCELLED',
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      tx.update(workshopRef, {
+        seatsTaken,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+    }
+    return { bookingId, status: 'CANCELLED' };
   });
 }

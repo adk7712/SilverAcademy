@@ -80,24 +80,29 @@ Every account below exists only in the emulator.
 
 ### Singpass users (mobile)
 
-Singpass is **mocked** (ADR-001). On the mobile login screen pick a profile from the mock picker. Under the hood the assertion is `mock:<profileId>`.
+Singpass is **mocked** (ADR-001). On the mobile login screen tap **Log in with Singpass** to open the fake Singpass screen. It has two tabs: the app/QR tab (tap a demo account to pretend-scan it) and the Singpass ID tab (tap a demo account to fill its ID, type any non-empty password, then submit). Either way a fake "Approve in the Singpass app" step runs for about 2 seconds. The password is never checked, so do not enter a real one. Under the hood the assertion is `mock:<profileId>`.
 
-| Profile id (mock picker) | Name | Role(s) | Seeded data |
+| Profile id | Name | Role(s) | Seeded data |
 |---|---|---|---|
 | `learner-35` | Tan Wei Ming, age 35 | LEARNER | Booked `ws-01` (Smartphone Basics, open) |
-| `senior-49-edge` | Lim Hui Ling, age 49 | LEARNER | Booked `ws-02` (nearly full) and attended `ws-04` (completed, feedback given) |
+| `senior-49-edge` | Lim Hui Ling, age 49 | LEARNER | Booked `ws-02` (nearly full) and attended `ws-04` (completed, feedback given). Demo tools only (see Notes). |
 | `senior-50` | Ong Siew Hoon, age 50 | LEARNER + SENIOR_INSTRUCTOR | Instructor profile PENDING (review queue) |
 | `senior-62` | Ahmad bin Yusof, age 62 | LEARNER + SENIOR_INSTRUCTOR | Profile APPROVED; teaches `ws-01`, `ws-04`, `ws-05`, `ws-07`, `ws-real-01`; wallet 11 points after one redemption |
 | `senior-72` | Mary Goh Bee Lian, age 72 | LEARNER + SENIOR_INSTRUCTOR | Profile APPROVED; teaches `ws-02`, `ws-03`, `ws-06`, `ws-08`, `ws-real-02`; wallet 30 points |
 | `volunteer-28` | Priya Nair, age 28 | VOLUNTEER | Assigned to `ws-03` (Chair Tai Chi, needs volunteers) |
+| `suspended-demo` | Koh Beng Huat, DOB 1968-04-12 | LEARNER + SENIOR_INSTRUCTOR | Status SUSPENDED (Auth user disabled, claim SUSPENDED, like a real suspension). No workshops, bookings or wallet. Login returns `ACCOUNT_SUSPENDED`. Demo tools only (see Notes). |
 
 Notes:
 - `senior-49-edge` turns 50 on 2027-06-30. A reseed after that date gives this learner the SENIOR_INSTRUCTOR role too.
+- `senior-49-edge` and `suspended-demo` are not in the normal demo account list. Use **Demo tools** (a collapsed button at the bottom of the fake Singpass screen) or type the ID. Typed IDs and the app-tab pretend-scan go through the approval step; tapping a demo account on the ID tab only fills the ID; Demo tools skip it.
+- `suspended-demo` is always refused with `ACCOUNT_SUSPENDED` in mock mode, even with no user doc: the server never registers that identity (`decideSingpassLogin`, mock mode only; no other login is affected). A reseed restores the SUSPENDED doc, the disabled Auth user and the claim.
+- If an admin reactivates `suspended-demo` (Accounts page), it logs in normally from then on, so the suspended simulation stops showing the error until the next reseed.
+- Hosted rollout order: merge the opt-in branch (PR #11), deploy functions, reseed, then ship mobile web. Do not reseed a hosted project casually: it overwrites seeded documents and Auth users on their fixed IDs, including any live edits (see `known-limitations.md`, section 7).
 - A user holding both LEARNER and SENIOR_INSTRUCTOR gets a mode toggle above the tabs.
 
 ### Staff accounts (web)
 
-Staff sign in on the web app with their staff user id and password. Staff are not offered the mobile mock picker (the mobile app says "use the web app").
+Staff sign in on the web app with their staff user id and password. Staff are not offered the mobile fake Singpass screen (the mobile app says "use the web app").
 
 | Login (staff user id) | Email | Role | Notes |
 |---|---|---|---|
@@ -126,7 +131,7 @@ Before you start: emulators running, freshly seeded, and `functions/.env.local` 
 
 ### Flow A: Learner Booking Journey (mobile)
 
-1. Launch the mobile app (`npm run dev:mobile`). On the login screen, choose `learner-35` (Tan Wei Ming) from the mock picker.
+1. Launch the mobile app (`npm run dev:mobile`). On the login screen, tap **Log in with Singpass**, then tap the `learner-35` (Tan Wei Ming) demo account. The approval step takes about 2 seconds.
 2. **Discover** lists OPEN workshops. Use the search box, the category select and the date filter. Sort by "Soonest" or "Nearest" (nearest needs location permission; without it the note explains why).
    - Real event: **Digital Club @ Ayer Rajah** is marked **Real event**. Switch the toggle to **Map**: OpenStreetMap tiles show one pin per venue, including Ayer Rajah CC in the west and Changi Simei CC in the east. Tap the pin to list its workshop, then open it. The detail screen shows the venue on a map, the organiser (onePA) and a **View the original listing** button. If the tiles cannot load, Discover returns to the list with a note.
 3. Open **Smartphone Basics** (`ws-01`) or **Conversational Mandarin Over Tea** (`ws-05`). `learner-35` already holds `ws-01`, so for a clean booking use **`ws-05`**.
@@ -152,6 +157,15 @@ What this proves: the booking transaction (capacity and duplicate protection), t
 What this proves: the attendance transaction (single attendance, points only once, scanner authorisation), the points ledger and voucher redemption.
 
 Volunteer variant (optional): `volunteer-28` is assigned to `ws-03`, which needs volunteers. Log in as this volunteer to see Assigned workshops and the class list, and to scan with the same screen.
+
+### Demo tools: login edge cases (mobile)
+
+On the fake Singpass screen, open **Demo tools**. These skip the approval delay.
+
+- `suspended-demo`: login is refused with `ACCOUNT_SUSPENDED` (see the Notes in section 5 for the guard and for reactivation).
+- `senior-49-edge`: a 49-year-old logs in as a Learner only, with no Senior Instructor role and no mode toggle.
+- Singpass unavailable (`DOWN`): shows the Singpass unavailable message.
+- Failed login (`FAIL`): shows the failed login message.
 
 ### Partner approval (web, `partner01`)
 
@@ -186,7 +200,7 @@ Admin can also show **Accounts** (suspend and reactivate need a reason), **Works
 | `npm run format:check` / `npm run format` | Prettier check / write | No |
 | `npm test` | Jest (shared, functions unit tests, mobile logic tests) and the web Vitest suite | No |
 | `npm run test:emulator` | Rules tests and backend emulator integration tests. Starts and stops its own emulators. **Stop `npm run emulators` first** (same ports). | Starts its own |
-| `npm run e2e` | End-to-end run of the core loop against already-running, freshly seeded emulators (`firebase/e2e/run.ts`). Real callable HTTP with Auth emulator tokens, plus rules checks. About 63 checks. | Yes, see section 9 |
+| `npm run e2e` | End-to-end run of the core loop against already-running, freshly seeded emulators (`firebase/e2e/run.ts`). Real callable HTTP with Auth emulator tokens, plus rules checks. About 70 checks. | Yes, see section 9 |
 
 CI (`.github/workflows/ci.yml`, Node 24) runs on every PR and push to `master` in two jobs: `test` (lint, format check, typecheck, Jest with the coverage gate, web Vitest) and `emulator` (`npm run test:emulator`, then seed and `npm run e2e` on fresh emulators). Each job writes its test counts, plus coverage for `test`, to the run summary.
 

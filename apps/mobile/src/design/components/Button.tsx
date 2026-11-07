@@ -47,6 +47,7 @@ export function Button({
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: inactive, busy: loading, expanded }}
+      aria-expanded={expanded} // react-native-web does not map accessibilityState
       testID={testID}
       style={({ pressed }) => [
         styles.base,

@@ -78,6 +78,10 @@ export const CALLABLES = {
     input: bookings.bookWorkshopInput,
     output: bookings.bookWorkshopOutput,
   },
+  'bookings-cancelBooking': {
+    input: bookings.cancelBookingInput,
+    output: bookings.cancelBookingOutput,
+  },
   'bookings-getRoster': { input: bookings.getRosterInput, output: bookings.getRosterOutput },
 
   'attendance-recordAttendance': {

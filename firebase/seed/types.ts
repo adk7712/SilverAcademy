@@ -12,6 +12,8 @@ export interface AuthUserSpec {
   uid: string;
   displayName: string;
   roles: Role[];
+  /** Auth custom-claim status; defaults to ACTIVE. */
+  status?: 'ACTIVE' | 'SUSPENDED';
   email?: string;
   password?: string;
 }

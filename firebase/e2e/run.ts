@@ -195,6 +195,12 @@ async function main(): Promise<void> {
       undefined,
       'SINGPASS_UNAVAILABLE',
     );
+    await expectError(
+      'auth-exchangeSingpass',
+      { assertion: 'mock:suspended-demo' },
+      undefined,
+      'ACCOUNT_SUSPENDED',
+    );
     const young = await singpassLogin('senior-49-edge');
     check('49-year-old is not senior-eligible', young.seniorEligible === false);
     return s;
@@ -518,6 +524,42 @@ async function main(): Promise<void> {
     );
     const again = await singpassLogin('learner-35');
     check('reactivated user logs in again', claimsOf(again.token).status === 'ACTIVE');
+  });
+
+  // ---- Seeded suspended-demo: restored to SUSPENDED at the end so later sections are unaffected
+  await section('Seeded suspended-demo: Auth disabled, admin reactivate', async () => {
+    const snap = await db.collection('users').where('displayName', '==', 'Koh Beng Huat').get();
+    const doc = snap.docs[0];
+    check('seeded suspended-demo user doc found', snap.size === 1 && doc !== undefined, snap.size);
+    if (!doc) return;
+    const authDisabled = async (): Promise<unknown> => {
+      const res = await post(
+        `${AUTH}/projects/${PROJECT}/accounts:lookup`,
+        { localId: [doc.id] },
+        'owner',
+      );
+      return (res.body.users as Json[] | undefined)?.[0]?.disabled;
+    };
+    check('seeded Auth user is disabled', (await authDisabled()) === true);
+    const active = await ok(
+      'users-setAccountStatus',
+      { uid: doc.id, action: 'REACTIVATE', expectedVersion: doc.data().version },
+      admin.token,
+    );
+    check('admin REACTIVATE makes it ACTIVE', active.status === 'ACTIVE', active);
+    check('Auth user enabled again', (await authDisabled()) !== true);
+    const restored = await ok(
+      'users-setAccountStatus',
+      {
+        uid: doc.id,
+        action: 'SUSPEND',
+        reason: 'e2e restore seeded state',
+        expectedVersion: active.version,
+      },
+      admin.token,
+    );
+    check('restored to SUSPENDED', restored.status === 'SUSPENDED', restored);
+    check('Auth user disabled again', (await authDisabled()) === true);
   });
 
   // ---- Rules

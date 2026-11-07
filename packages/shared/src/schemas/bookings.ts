@@ -43,3 +43,9 @@ export const getRosterOutput = z.object({
   ),
   volunteers: z.array(z.object({ volunteerId: idSchema, volunteerName: z.string() })),
 });
+
+export const cancelBookingInput = z.object({ workshopId: idSchema }).strict();
+export const cancelBookingOutput = z.object({
+  bookingId: idSchema,
+  status: z.literal('CANCELLED'),
+});

@@ -1,74 +1,30 @@
-// UC #0-1 Login with Singpass (mock profile picker) with failure/unavailable handling and first-login choice.
-import { View } from 'react-native';
-import {
-  AppText,
-  Button,
-  Card,
-  ErrorBanner,
-  ListItem,
-  LoadingState,
-  Screen,
-  useTheme,
-} from '../../../design';
+// UC #0-1 Login with Singpass: one button that opens the fake Singpass screen (demo; real Singpass replaces it later).
+import { useState } from 'react';
+import { AppText, Button, Screen } from '../../../design';
 import { strings } from '../../../i18n';
-import { errorMessage } from '../../../services/errors/errorMessage';
-import { SIMULATIONS, pickerEntries } from '../controller/loginLogic';
 import { useLoginController } from '../controller/useLoginController';
-import { RegisterChoice } from './RegisterChoice';
+import { DemoBanner } from './DemoBanner';
+import { FakeSingpassScreen } from './FakeSingpassScreen';
 
 export function LoginScreen() {
-  const { phase, login, reset } = useLoginController();
-  const { spacing } = useTheme();
+  const controller = useLoginController();
+  const [singpassOpen, setSingpassOpen] = useState(false);
 
-  if (phase.kind === 'register') {
-    return (
-      <Screen title={strings.auth.loginTitle}>
-        <RegisterChoice
-          profileId={phase.profileId}
-          onChoose={(registerAs) => void login(phase.profileId, registerAs)}
-          onCancel={reset}
-        />
-      </Screen>
-    );
+  if (singpassOpen) {
+    return <FakeSingpassScreen controller={controller} onBack={() => setSingpassOpen(false)} />;
   }
 
   return (
-    <Screen title={strings.auth.loginTitle} testID="login-screen">
+    <Screen title={strings.auth.loginTitle} banner={<DemoBanner />} testID="login-screen">
       <AppText>{strings.auth.loginIntro}</AppText>
-      {phase.kind === 'error' ? (
-        <ErrorBanner message={errorMessage(phase.error)} onDismiss={reset} testID="login-error" />
-      ) : null}
-      {phase.kind === 'loading' ? (
-        <LoadingState label={strings.auth.loggingIn} />
-      ) : (
-        <View style={{ gap: spacing.sm }}>
-          <Card>
-            <AppText variant="caption" color="textMuted">
-              {strings.auth.mockNotice}
-            </AppText>
-          </Card>
-          <AppText variant="bodyStrong">{strings.auth.pickerLabel}</AppText>
-          {pickerEntries().map((entry) => (
-            <ListItem
-              key={entry.profileId}
-              title={entry.title}
-              subtitle={entry.subtitle}
-              accessibilityLabel={`${entry.title}, ${entry.subtitle}`}
-              onPress={() => void login(entry.profileId)}
-              testID={`profile-${entry.profileId}`}
-            />
-          ))}
-          {SIMULATIONS.map((s) => (
-            <Button
-              key={s.profileId}
-              variant="ghost"
-              label={s.label()}
-              onPress={() => void login(s.profileId)}
-              testID={`simulate-${s.profileId}`}
-            />
-          ))}
-        </View>
-      )}
+      <Button
+        label={strings.auth.loginWithSingpass}
+        onPress={() => setSingpassOpen(true)}
+        testID="login-singpass"
+      />
+      <AppText variant="caption" color="textMuted">
+        {strings.auth.loginDemoNote}
+      </AppText>
     </Screen>
   );
 }

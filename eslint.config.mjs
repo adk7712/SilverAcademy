@@ -29,6 +29,7 @@ export default tseslint.config(
       'coverage/**',
       'docs/**',
       'apps/mobile/assets/**',
+      '.deploy/**',
     ],
   },
   js.configs.recommended,

@@ -32,7 +32,7 @@ HttpsError code mapping: `architecture.md` §6. `MAP_UNAVAILABLE` is client-only
 
 | Function | Roles | Input | Output | Errors | Notes |
 |---|---|---|---|---|---|
-| `auth-exchangeSingpass` (#0-1) | public | `{ assertion: string, nonce?: string, registerAs?: 'LEARNER'\|'VOLUNTEER' }` | `{ customToken, uid, roles: Role[], seniorEligible, isNewUser }` | SINGPASS_AUTH_FAILED, SINGPASS_UNAVAILABLE, PROFILE_UNAVAILABLE, REGISTRATION_REQUIRED (new user, no `registerAs`), ACCOUNT_SUSPENDED | Creates/updates `users`, sets claims. See arch §5.1. |
+| `auth-exchangeSingpass` (#0-1) | public | `{ assertion: string, nonce?: string, registerAs?: 'LEARNER'\|'VOLUNTEER' }` | `{ customToken, uid, roles: Role[], seniorEligible, isNewUser }` | SINGPASS_AUTH_FAILED, SINGPASS_UNAVAILABLE, PROFILE_UNAVAILABLE, REGISTRATION_REQUIRED (new user, no `registerAs`), ACCOUNT_SUSPENDED (also, in mock mode only, for the `suspended-demo` identity when it has no user doc) | Creates/updates `users`, sets claims. See arch §5.1. |
 | `auth-recordStaffLogin` (#0-2) | public | `{ userId: string, outcome: 'SUCCESS'\|'FAILURE'\|'BLOCKED' }` | `{ roles: Role[] }` (SUCCESS) or `{}` | NOT_STAFF_ACCOUNT (SUCCESS caller lacks ADMIN/CP, or `userId` != caller's `staffUserId`) | Audit `STAFF_LOGIN` with outcome. SUCCESS requires auth; FAILURE/BLOCKED callable unauthenticated. Web signs out on NOT_STAFF_ACCOUNT. `userId` is lowercased (case-insensitive). FAILURE/BLOCKED are client-reported (`details.clientReported`) and rate-limited (5/min per known staff id, 10/min for unknown ids, 60/min overall): over the cap the call returns `{}` without writing. Claims status comes from `users/{uid}.status`. |
 
 ## 2. users
@@ -65,6 +65,7 @@ Admin account search (#5-1 step 2-4) is a direct Firestore read: `users where di
 | Function | Roles | Input | Output | Errors | Notes |
 |---|---|---|---|---|---|
 | `bookings-bookWorkshop` (#2-2) | LEARNER | `{ workshopId }` | `{ bookingId, ticketCode, qrPayload, workshopSnapshot, seatsRemaining }` | NOT_FOUND, CANNOT_BOOK_OWN_WORKSHOP, WORKSHOP_NOT_OPEN, WORKSHOP_STARTED, ALREADY_BOOKED (details `{ bookingId }`), WORKSHOP_FULL | Transaction arch §4.1. Notify learner `BOOKING_CONFIRMED`. |
+| `bookings-cancelBooking` | LEARNER (own booking) | `{ workshopId }` | `{ bookingId, status: 'CANCELLED' }` | NOT_FOUND, PERMISSION_DENIED (ownership mismatch), INVALID_TRANSITION (ATTENDED), WORKSHOP_NOT_OPEN, WORKSHOP_STARTED | Before current startAt on OPEN workshop; atomically cancels and frees one seat. Already CANCELLED is a no-write success. Booking retained; rebooking remains disallowed (ADR-026). |
 | `bookings-getRoster` (#3-3, SI class list) | SENIOR_INSTRUCTOR (owner), VOLUNTEER (ASSIGNED), ADMIN | `{ workshopId }` | `{ workshop: { id, title, startAt, endAt, venue, capacity, seatsTaken, attendedCount }, learners: { bookingId, learnerName, status, attendedAt? }[], volunteers: { volunteerId, volunteerName }[] }` | NOT_FOUND, NOT_ASSIGNED (volunteer not assigned, #3-3 Ex1), PERMISSION_DENIED (SI not owner) | Never returns `qrPayload` or `ticketCode` (review H1: a learner reads their own code from their ticket for manual check-in). Only CONFIRMED/ATTENDED bookings. |
 
 My Bookings / Digital Ticket (#2-3) are direct reads of `bookings where learnerId == uid`, cached to AsyncStorage for offline display (ADR-019).
