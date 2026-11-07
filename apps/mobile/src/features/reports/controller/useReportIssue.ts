@@ -6,7 +6,7 @@ import {
   type IncidentCategory,
 } from '@silveracademy/shared';
 import { format, strings } from '../../../i18n';
-import { errorMessage } from '../../../services/errors/errorMessage';
+import { errorMessage, errorOrNull } from '../../../services/errors/errorMessage';
 import { useSession } from '../../auth';
 import {
   deleteAttachment,
@@ -129,16 +129,9 @@ export function useReportIssue() {
     }
   };
 
-  /** Answers an AWAITING_INFO request. Resolves to an error message, or null. */
-  const reply = async (referenceNo: string, text: string) => {
-    try {
-      await respondToIncident(referenceNo, text.trim());
-      await loadReports();
-      return null;
-    } catch (e) {
-      return errorMessage(e);
-    }
-  };
+  /** Answers an AWAITING_INFO request. */
+  const reply = (referenceNo: string, text: string) =>
+    errorOrNull(respondToIncident(referenceNo, text).then(loadReports));
 
   const reset = () => {
     setReferenceNo(null);

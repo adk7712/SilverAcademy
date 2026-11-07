@@ -1,16 +1,14 @@
 // UC #2-3 ViewTicket: high-contrast QR, session-code check-in fallback, attendance status; cached for offline (ADR-019).
-import { useState } from 'react';
 import { View } from 'react-native';
 import {
   AppText,
   Badge,
-  Button,
   Card,
   EmptyState,
   ErrorBanner,
   LoadingState,
   Screen,
-  TextField,
+  SubmitField,
   useTheme,
 } from '../../../../design';
 import { format, strings } from '../../../../i18n';
@@ -21,43 +19,8 @@ import { CancelBookingAction } from './CancelBookingAction';
 import { useLearnerBookings } from '../../controller/useLearnerBookings';
 import { QrCodeView } from './QrCodeView';
 
-const s = strings.bookingsLearner;
-
-/** Fallback when the QR cannot be scanned: type the code the instructor announces. */
-function SessionCodeCheckIn({ onSubmit }: { onSubmit: (code: string) => Promise<string | null> }) {
-  const [code, setCode] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const submit = async () => {
-    setBusy(true);
-    setError(await onSubmit(code));
-    setBusy(false);
-  };
-  return (
-    <Card>
-      <AppText variant="title">{s.sessionCodeTitle}</AppText>
-      <TextField
-        label={s.sessionCodeLabel}
-        helper={s.sessionCodeHelp}
-        value={code}
-        onChangeText={setCode}
-        autoCapitalize="characters"
-        autoCorrect={false}
-        error={error ?? undefined}
-        testID="session-code-input"
-      />
-      <Button
-        label={s.sessionCodeSubmit}
-        loading={busy}
-        disabled={code.trim().length < 4}
-        onPress={() => void submit()}
-        testID="session-code-submit"
-      />
-    </Card>
-  );
-}
-
 export function TicketScreen() {
+  const s = strings.bookingsLearner;
   const { spacing } = useTheme();
   const { bookingId } = useAppRoute<'Ticket'>().params;
   const { bookings, loading, error, cachedAt, reload, cancelling, cancelError, cancel, checkIn } =
@@ -88,7 +51,17 @@ export function TicketScreen() {
           <>
             <QrCodeView value={booking.qrPayload} label={s.qrLabel} />
             {booking.status === 'CONFIRMED' && !cachedAt ? (
-              <SessionCodeCheckIn onSubmit={(code) => checkIn(booking.id, code)} />
+              <Card>
+                <AppText variant="title">{s.sessionCodeTitle}</AppText>
+                <SubmitField
+                  label={s.sessionCodeLabel}
+                  helper={s.sessionCodeHelp}
+                  submitLabel={s.sessionCodeSubmit}
+                  minLength={4}
+                  onSubmit={(code) => checkIn(booking.id, code)}
+                  testID="session-code-input"
+                />
+              </Card>
             ) : null}
           </>
         ) : (

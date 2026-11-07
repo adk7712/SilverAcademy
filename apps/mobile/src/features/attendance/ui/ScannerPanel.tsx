@@ -2,12 +2,11 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { AppText, Button, useTheme } from '../../../design';
+import { AppText, Button, SubmitField, useTheme, useToast } from '../../../design';
 import { format, strings } from '../../../i18n';
-import { useScanController } from '../controller/useScanController';
+import { saveSessionCode, useScanController } from '../controller/useScanController';
 import type { ScanWorkshop } from '../types';
 import { CameraScanner } from './CameraScanner';
-import { SessionCodeEntry } from './SessionCodeEntry';
 import { ScanResultBanner } from './ScanResultBanner';
 
 const s = strings.attendanceScan;
@@ -29,6 +28,7 @@ interface Props {
 
 export function ScannerPanel({ workshop, onChangeWorkshop }: Props) {
   const { spacing } = useTheme();
+  const toast = useToast();
   const { state, onBarcode, reset } = useScanController(workshop.id);
   const [manual, setManual] = useState(false);
   // Only the instructor may set the session code; volunteers scan.
@@ -45,7 +45,18 @@ export function ScannerPanel({ workshop, onChangeWorkshop }: Props) {
         <ScanResultBanner outcome={state.outcome} source={workshop.source} onNext={reset} />
       ) : manual ? (
         <>
-          <SessionCodeEntry workshopId={workshop.id} />
+          <SubmitField
+            label={s.codeLabel}
+            helper={s.codeHint}
+            submitLabel={s.saveCode}
+            minLength={4}
+            onSubmit={async (code) => {
+              const error = await saveSessionCode(workshop.id, code);
+              if (!error) toast.show(format(s.codeSaved, { code: code.toUpperCase() }), 'success');
+              return error;
+            }}
+            testID="session-code-input"
+          />
           <Button label={s.useCamera} variant="secondary" onPress={() => setManual(false)} />
         </>
       ) : (

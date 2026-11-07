@@ -41,7 +41,7 @@ export async function checkIn(
   if (booking?.learnerId !== caller.uid) throw new AppError('NO_BOOKING');
   const set = (await refs.raw(db, COL.checkInCodes).doc(booking.workshopId).get()).data();
   if (set?.code !== input.code) throw new AppError('CHECKIN_CODE_INVALID');
-  const decision = await recordAttendanceTx(db, {
+  return recordAttendanceTx(db, {
     workshopId: booking.workshopId,
     bookingId: input.bookingId,
     method: 'MANUAL',
@@ -50,14 +50,6 @@ export async function checkIn(
     ignoreCheckInWindow: opts.ignoreCheckInWindow ?? ignoreCheckInWindow(),
     now,
   });
-  return {
-    bookingId: input.bookingId,
-    learnerName: decision.learnerName,
-    workshopTitle: decision.workshopTitle,
-    attendedAt: now.toISOString(),
-    method: 'MANUAL',
-    pointsAwarded: decision.pointsAwarded,
-  };
 }
 
 export const setCheckInCodeCallable = defineCallable(

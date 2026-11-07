@@ -1,14 +1,5 @@
 // UC #2-5 "my reports": reference numbers with status, and a reply when the admin asks for information.
-import { useState } from 'react';
-import {
-  AppText,
-  Badge,
-  Button,
-  Card,
-  ErrorBanner,
-  TextField,
-  type BadgeTone,
-} from '../../../design';
+import { AppText, Badge, Card, ErrorBanner, SubmitField, type BadgeTone } from '../../../design';
 import { format, strings } from '../../../i18n';
 import type { MyReport } from '../reportTypes';
 
@@ -21,37 +12,6 @@ const TONE: Record<MyReport['status'], BadgeTone> = {
   CLOSED: 'neutral',
 };
 
-type Reply = (referenceNo: string, text: string) => Promise<string | null>;
-
-function ReplyForm({ referenceNo, onReply }: { referenceNo: string; onReply: Reply }) {
-  const [text, setText] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const send = async () => {
-    setBusy(true);
-    setError(await onReply(referenceNo, text));
-    setBusy(false);
-  };
-  return (
-    <>
-      <TextField
-        label={t.replyLabel}
-        value={text}
-        onChangeText={setText}
-        multiline
-        error={error ?? undefined}
-        testID={`report-reply-${referenceNo}`}
-      />
-      <Button
-        label={t.replySend}
-        loading={busy}
-        disabled={text.trim() === ''}
-        onPress={() => void send()}
-      />
-    </>
-  );
-}
-
 export function MyReportsList({
   reports,
   error,
@@ -61,7 +21,7 @@ export function MyReportsList({
   reports: MyReport[];
   error: string | null;
   onRetry: () => void;
-  onReply: Reply;
+  onReply: (referenceNo: string, text: string) => Promise<string | null>;
 }) {
   return (
     <>
@@ -84,7 +44,13 @@ export function MyReportsList({
             <AppText>{format(t.infoResponded, { text: r.infoResponse })}</AppText>
           ) : null}
           {r.status === 'AWAITING_INFO' ? (
-            <ReplyForm referenceNo={r.referenceNo} onReply={onReply} />
+            <SubmitField
+              label={t.replyLabel}
+              submitLabel={t.replySend}
+              multiline
+              onSubmit={(text) => onReply(r.referenceNo, text)}
+              testID={`report-reply-${r.referenceNo}`}
+            />
           ) : null}
           {r.resolution ? <AppText>{format(t.resolution, { text: r.resolution })}</AppText> : null}
         </Card>

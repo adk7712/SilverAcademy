@@ -7,3 +7,7 @@ export function errorMessage(error: unknown): string {
   if (isNetworkError(appError)) return strings.clientErrors.network;
   return strings.errors[appError.code];
 }
+
+/** For form actions: resolves to the error text, or null when the call succeeds. */
+export const errorOrNull = (call: Promise<unknown>): Promise<string | null> =>
+  call.then(() => null, errorMessage);

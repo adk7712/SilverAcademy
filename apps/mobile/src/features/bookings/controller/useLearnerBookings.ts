@@ -2,7 +2,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSession } from '../../auth';
-import { errorMessage } from '../../../services/errors/errorMessage';
+import { errorMessage, errorOrNull } from '../../../services/errors/errorMessage';
 import {
   cacheTickets,
   cancelOwnBooking,
@@ -110,15 +110,7 @@ export function useLearnerBookings(): LearnerBookingsState {
   );
 
   const checkIn = useCallback(
-    async (bookingId: string, code: string) => {
-      try {
-        await checkInWithCode(bookingId, code.trim());
-        reload();
-        return null;
-      } catch (e) {
-        return errorMessage(e);
-      }
-    },
+    (bookingId: string, code: string) => errorOrNull(checkInWithCode(bookingId, code).then(reload)),
     [reload],
   );
 

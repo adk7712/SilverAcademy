@@ -31,24 +31,14 @@ export async function recordAttendance(
   opts: RecordAttendanceOptions = {},
 ): Promise<CallableResultOf<'attendance-recordAttendance'>> {
   const { input, caller, db, now } = ctx;
-  const method = 'QR';
-  const bookingId = verifyQr(input.qrPayload);
-  const decision = await recordAttendanceTx(db, {
+  return recordAttendanceTx(db, {
     workshopId: input.workshopId,
-    bookingId,
-    method,
+    bookingId: verifyQr(input.qrPayload),
+    method: 'QR',
     scanner: { uid: caller.uid, roles: caller.roles },
     ignoreCheckInWindow: opts.ignoreCheckInWindow ?? ignoreCheckInWindow(),
     now,
   });
-  return {
-    bookingId,
-    learnerName: decision.learnerName,
-    workshopTitle: decision.workshopTitle,
-    attendedAt: now.toISOString(),
-    method,
-    pointsAwarded: decision.pointsAwarded,
-  };
 }
 
 export const recordAttendanceCallable = defineCallable(

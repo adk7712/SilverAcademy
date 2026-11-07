@@ -13,9 +13,10 @@ import {
   runTx,
   writeAuditTx,
   writeLedgerTx,
+  type CallableResultOf,
   type WalletSnapshot,
 } from '../../common';
-import { decideAttendance, type AttendanceDecision } from '../controller/decideAttendance';
+import { decideAttendance } from '../controller/decideAttendance';
 
 export interface RecordAttendanceArgs {
   workshopId: string;
@@ -36,7 +37,7 @@ export interface RecordAttendanceArgs {
 export async function recordAttendanceTx(
   db: Firestore,
   args: RecordAttendanceArgs,
-): Promise<AttendanceDecision> {
+): Promise<CallableResultOf<'attendance-recordAttendance'>> {
   const workshopRef = refs.workshops(db).doc(args.workshopId);
   const bookingRef = refs.bookings(db).doc(args.bookingId);
   const attendanceRef = refs.raw(db, COL.attendance).doc(args.bookingId);
@@ -104,6 +105,13 @@ export async function recordAttendanceTx(
         instructorId: decision.instructorId,
       },
     });
-    return decision;
+    return {
+      bookingId: args.bookingId,
+      learnerName: decision.learnerName,
+      workshopTitle: decision.workshopTitle,
+      attendedAt: args.now.toISOString(),
+      method: args.method,
+      pointsAwarded: decision.pointsAwarded,
+    };
   });
 }

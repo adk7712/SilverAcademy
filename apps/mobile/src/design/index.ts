@@ -7,6 +7,7 @@ export { Button, type ButtonVariant } from './components/Button';
 export { IconButton } from './components/IconButton';
 export { Card } from './components/Card';
 export { TextField } from './components/TextField';
+export { SubmitField } from './components/SubmitField';
 export { Select } from './components/Select';
 export { Segmented, type SegmentOption } from './components/Segmented';
 export { Header } from './components/Header';
