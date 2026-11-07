@@ -121,7 +121,7 @@ Local staff passwords are the seed defaults in `firebase/seed/guard.ts`, or the 
   - `ws-real-02`: Christmas @ Changi Simei 2026 - Let's Jingle & Mingle, Sat 12 Dec 2026, 14:00 to 16:30, at Changi Simei Community Club (Level 2 MPH & Civic Plaza), 10 Simei Street 2, Singapore 529915. Organised by Changi Simei CC; taught by `senior-72` for the demo.
 - 5 facilities and 13 slots (AVAILABLE, BOOKED, UNAVAILABLE, MAINTENANCE), and 8 venue requests (one per real event).
 - 3 voucher tiers `DEMOVP_5`, `DEMOVP_10`, `DEMOVP_20`, with 20 fictional codes such as `DEMOVP-05-0001`. The inventory is server-only; admins see masked codes.
-- Demo ticket codes for the manual-entry fallback: `K7Q2M9XA` (ws-01, booked by `learner-35`), `R4T8NH3V` (ws-02), `WB5D6JZP` (ws-04, already attended).
+- Check-in without a camera: the instructor sets a session code on the scan screen, and the learner types it on their ticket (ADR-030).
 
 ---
 
@@ -137,8 +137,8 @@ Before you start: emulators running, freshly seeded, and `functions/.env.local` 
 2. **Discover** lists OPEN workshops. Use the search box, the category select and the date filter. Sort by "Soonest" or "Nearest" (nearest needs location permission; without it the note explains why).
    - Real event: **Digital Club @ Ayer Rajah** is marked **Real event**. Switch the toggle to **Map**: OpenStreetMap tiles show one pin per venue, including Ayer Rajah CC in the west and Changi Simei CC in the east. Tap the pin to list its workshop, then open it. The detail screen shows the venue on a map, the organiser (onePA) and a **View the original listing** button. If the tiles cannot load, Discover returns to the list with a note.
 3. Open **Smartphone Basics** (`ws-01`) or **Conversational Mandarin Over Tea** (`ws-05`). `learner-35` already holds `ws-01`, so for a clean booking use **`ws-05`**.
-4. Tap **Book Workshop**, then confirm. A success card shows the 8-character ticket code.
-5. Open **My Bookings**, then the booking, to see the **Ticket**: the black-on-white QR, the `XXXX-XXXX` code for manual check-in, the venue, the time and the instructor.
+4. Tap **Book Workshop**, then confirm. A success card confirms the booking.
+5. Open **My Bookings**, then the booking, to see the **Ticket**: the black-on-white QR, the session-code field for check-in without a scan, the venue, the time and the instructor.
 6. Try to book `ws-05` again. The app shows "already booked" with a **View my ticket** link (server `ALREADY_BOOKED`).
 7. Optional offline check: stop the emulators (or enable airplane mode on a device), reopen the Ticket. The cached copy shows with a "last updated" banner (ADR-019). **Not verified on a real device yet**; see `known-limitations.md`.
 
@@ -148,7 +148,7 @@ What this proves: the booking transaction (capacity and duplicate protection), t
 
 1. Log in as `senior-62` (Ahmad bin Yusof). Toggle to **Instructor** mode. The **Dashboard** lists his workshops, including `ws-05`, which `learner-35` just booked.
 2. Tap **Scan Attendance** (or open the workshop's roster first, then the scanner). Pick **`ws-05`** (OPEN, check-in window open because of `DEMO_IGNORE_CHECKIN_WINDOW`).
-3. Check in the learner. The camera needs a physical device or a second screen showing the learner's QR. In the simulator or the web preview, use **Enter ticket code manually** and type the learner's `XXXX-XXXX` code from step 5 of Flow A.
+3. Check in the learner. The camera needs a physical device or a second screen showing the learner's QR. In the simulator or the web preview, tap **Set session code** as the instructor, save a code, then type it on the learner's ticket (**Cannot scan?**).
    - Success banner: learner name, workshop, "+1 point" (points always go to the instructor who owns the workshop, ADR-010).
 4. Scan the same code again. The result is **ALREADY_ATTENDED** with the learner's name and the time of check-in (once-only rule).
 5. Learner accounts have no scanner screen. If you call the attendance function directly as a learner, the server refuses it (PERMISSION_DENIED); the e2e run checks this.
@@ -240,7 +240,7 @@ Feature modules (mobile and web and functions): `auth`, `workshops`, `bookings`,
 4. **`expo start` rewrites `apps/mobile/tsconfig.json`.** Run Prettier afterwards: `npx prettier --write apps/mobile/tsconfig.json`, or `npm run format` to fix everything.
 5. **No real Singpass.** `AUTH_MODE=mock` is the only working mode. `AUTH_MODE=singpass` returns SINGPASS_UNAVAILABLE. The mock refuses to run outside the emulators unless `ALLOW_MOCK_AUTH=true` is set (ADR-028); only the hosted demo sets it. Do not try to connect a real Singpass account.
 6. **Ports are shared.** The emulators, `npm run test:emulator` and `npm run e2e` all need ports 8080, 9099, 9199 and 4000/5001. If a run says "port taken", find the holder with `lsof -i :8080` and stop it. Kill stray `java` processes left by crashed emulator runs.
-7. **Camera scanning is untested on devices.** It needs a physical phone, or HTTPS/localhost on web. Use the manual ticket-code entry in simulators.
+7. **Camera scanning is untested on devices.** It needs a physical phone, or HTTPS/localhost on web. Use the session code in simulators.
 8. **Offline ticket on cold start.** Cached claims let the ticket open when the ID token has expired and the device is offline (review H2 fix). Not verified on a device yet.
 9. **The rules trust the `status` claim for up to 1 hour.** A suspended user can still read their own data through Firestore/Storage rules until the token expires, but callables block them immediately (ADR-025). Do not treat suspension as instant for data reads in a demo.
 10. **Seed data is relative to the clock.** If upcoming workshops look past, reseed.

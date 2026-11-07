@@ -17,7 +17,7 @@ Start with `dev-guide.md` section 6 and run both demo flows, so you know the cur
    - Web: the Partner approval (approve, reject, request info, slot add and edit), Admin voucher upload (CSV preview and rejected rows), accounts suspend and reactivate, incident status updates.
    - Record each result in `checklists/use-case-coverage.md` and `progress.md`. Write a handoff.
 2. **Verify the NFR checks** (V9): scan under 3 s, search under 2 s on seed data, 44 px targets on a device, and offline ticket display. Tick `checklists/phase3-quality.md` only with evidence.
-3. **Decide the H1 hardening** (SEC1). Pick one: award points only for QR check-ins, or cap MANUAL check-ins per workshop and flag them in the audit log. Needs a product decision, then a change in `functions/src/attendance` and `packages/shared`. Any demo that shows the manual code path should say that it can be abused.
+3. **H1 hardening** (SEC1). Done as a session code typed by the learner (ADR-030). Still open: rate limit `attendance-checkIn`, and decide whether a shared code needs a further control.
 4. **Retest the suspension retry path** (SEC3). The M1 fix makes SUSPEND and REACTIVATE retryable when the Auth step fails. Add an emulator test that simulates an Auth failure, then retries, and checks `disabled` and the claims.
 
 ## P2: close the gaps that matter beyond the demo
@@ -28,9 +28,9 @@ Start with `dev-guide.md` section 6 and run both demo flows, so you know the cur
 8. **Admin-facing reasons vs learner copy** (SEC6, L5). Add a `publicReason` field for learner notices, keep the admin reason in the audit log, and stop exposing `flagReason` to the user's own document.
 9. **Shared-device logout** (SEC9, L9). Clear `tickets:v1:<uid>` on explicit sign-out, or agree on a product rule for shared phones. This conflicts with the offline goal on a personal phone, so decide first.
 10. **OneMap live check** (V10). With a real token and the browser origin, check CORS and the search and postal lookup. If the map is in scope for the demo, decide whether to keep the schematic plot or add tiles (S2).
-11. **Reporter reply to AWAITING_INFO** (S6, L7). Add `reports-respondToIncident` and a mobile reply action, or record it as out of scope in the spec.
+11. **Reporter reply to AWAITING_INFO** (S6, L7). Done (`reports-respondToIncident`). Still open: notify the admin when a reply arrives.
 12. **Admin edits and denormalised copies** (B10). Decide whether title and description changes should update booking and request snapshots, or whether the snapshot wording should be shown in the UI.
-13. **Cancelling a workshop and volunteers** (B11). Mark assignments as WITHDRAWN on cancel, and tell volunteers.
+13. **Cancelling a workshop and volunteers** (B11). Done: assignments become WITHDRAWN and volunteers are notified.
 
 27. **Harden the hosted demo before anyone outside the course uses it** (H1, H2). Options: turn off `ALLOW_MOCK_AUTH` and gate the functions behind real sign-in, rotate the staff passwords, and add a Google Cloud budget alert (H7). Record the decision in `decisions.md`.
 28. **Automate hosted deploys** (H6). Add a CI job or workflow that deploys functions and rules to `silveracademy-demo-adk` on merge to `master`, using a service account stored as a GitHub secret. Until then, follow `hosted-demo.md` section 5 by hand.

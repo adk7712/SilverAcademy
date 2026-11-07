@@ -18,7 +18,7 @@ Auth:        SINGPASS_AUTH_FAILED SINGPASS_UNAVAILABLE PROFILE_UNAVAILABLE REGIS
 Users:       NOT_SENIOR_ELIGIBLE PROFILE_NOT_APPROVED PROFILE_ALREADY_APPROVED NOT_PENDING CANNOT_TARGET_ADMIN USER_ID_TAKEN
 Workshops:   WORKSHOP_NOT_EDITABLE CAPACITY_BELOW_BOOKINGS ACTIVE_BOOKINGS_CONFIRM_REQUIRED WORKSHOP_LOCKED_FIELDS
 Bookings:    WORKSHOP_NOT_OPEN WORKSHOP_STARTED WORKSHOP_FULL ALREADY_BOOKED CANNOT_BOOK_OWN_WORKSHOP
-Attendance:  INVALID_QR TICKET_NOT_FOUND WRONG_WORKSHOP NO_BOOKING ALREADY_ATTENDED NOT_AUTHORISED_FOR_WORKSHOP SESSION_NOT_ACTIVE
+Attendance:  INVALID_QR CHECKIN_CODE_INVALID WRONG_WORKSHOP NO_BOOKING ALREADY_ATTENDED NOT_AUTHORISED_FOR_WORKSHOP SESSION_NOT_ACTIVE
 Volunteers:  NOT_ACCEPTING_VOLUNTEERS VOLUNTEERS_FULL ALREADY_OPTED_IN NOT_ASSIGNED
 Feedback:    NOT_ATTENDED FEEDBACK_WINDOW_CLOSED ALREADY_SUBMITTED
 Venues:      SLOT_UNAVAILABLE SLOT_CONFLICT SLOT_BOOKED_LOCKED SLOT_OVERLAP INVALID_TIME_RANGE SLOT_IN_PAST
@@ -74,7 +74,9 @@ My Bookings / Digital Ticket (#2-3) are direct reads of `bookings where learnerI
 
 | Function | Roles | Input | Output | Errors | Notes |
 |---|---|---|---|---|---|
-| `attendance-recordAttendance` (#1-4, #3-4) | SENIOR_INSTRUCTOR, VOLUNTEER | `{ workshopId, qrPayload: string }` or `{ workshopId, ticketCode: string }` | `{ bookingId, learnerName, workshopTitle, attendedAt, method: 'QR'\|'MANUAL', pointsAwarded }` | INVALID_QR, TICKET_NOT_FOUND, NOT_FOUND, NOT_AUTHORISED_FOR_WORKSHOP, SESSION_NOT_ACTIVE, NO_BOOKING, WRONG_WORKSHOP, ALREADY_ATTENDED (details `{ learnerName, attendedAt }`) | Transaction arch §4.3. Target < 3 s (NFR 3.2): one query max + one tx. |
+| `attendance-recordAttendance` (#1-4, #3-4) | SENIOR_INSTRUCTOR, VOLUNTEER | `{ workshopId, qrPayload: string }` | `{ bookingId, learnerName, workshopTitle, attendedAt, method: 'QR'\|'MANUAL', pointsAwarded }` | INVALID_QR, NOT_FOUND, NOT_AUTHORISED_FOR_WORKSHOP, SESSION_NOT_ACTIVE, NO_BOOKING, WRONG_WORKSHOP, ALREADY_ATTENDED (details `{ learnerName, attendedAt }`) | Transaction arch §4.3. Target < 3 s (NFR 3.2): one query max + one tx. |
+| `attendance-setCheckInCode` (#1-4, ADR-030) | SENIOR_INSTRUCTOR | `{ workshopId, code }` (4 to 12 characters, trimmed, upper-cased) | `{ ok: true }` | NOT_AUTHORISED_FOR_WORKSHOP (not the workshop's instructor) | Stores `checkInCodes/{workshopId}`; setting again replaces it. |
+| `attendance-checkIn` (#1-4, ADR-030) | LEARNER | `{ bookingId, code }` | same as `attendance-recordAttendance`, `method: 'MANUAL'` | NO_BOOKING (not the caller's booking), CHECKIN_CODE_INVALID, then the `recordAttendance` errors | Learner types the instructor's session code. Points go to the instructor. |
 
 ## 6. venues
 
@@ -109,5 +111,6 @@ Wallet and points history (#1-5, #1-6) are direct reads of `wallets/{uid}` and `
 |---|---|---|---|---|---|
 | `reports-submitReport` (#2-5) | LEARNER, SENIOR_INSTRUCTOR, VOLUNTEER | `{ category, description, relatedWorkshopId?, relatedUserId?, attachmentPaths?: string[] (<=3) }` | `{ referenceNo }` | ATTACHMENT_INVALID (path not under `reportUploads/{uid}/`, missing, wrong type, or > 5 MB) | Client uploads to Storage first. Single `tx.create` of `incidents/{refNo}` (retry new refNo on collision) so no partial record (Ex3). |
 | `reports-updateIncident` (#5-3) | ADMIN | `{ incidentId, status?: IncidentStatus, resolution?, infoRequest?, expectedVersion }` | `{ status, version }` | NOT_FOUND, STALE_VERSION, INCIDENT_CLOSED (status RESOLVED/CLOSED, except RESOLVED→CLOSED), INVALID_TRANSITION, REASON_REQUIRED (AWAITING_INFO without `infoRequest`, RESOLVED without `resolution`) | Transitions: SUBMITTED→UNDER_REVIEW\|CLOSED; UNDER_REVIEW→AWAITING_INFO\|RESOLVED\|CLOSED; AWAITING_INFO→UNDER_REVIEW\|CLOSED; RESOLVED→CLOSED. Audit `INCIDENT_UPDATE`; notify reporter. Disciplinary actions reuse `users-setAccountStatus` / `workshops-adminSetStatus` with `incidentId`. |
+| `reports-respondToIncident` (#2-5) | LEARNER, SENIOR_INSTRUCTOR, VOLUNTEER | `{ incidentId, response }` | `{ status: 'UNDER_REVIEW' }` | NOT_FOUND (missing or not the reporter), INVALID_TRANSITION (not AWAITING_INFO) | Stores `infoResponse`, version +1, audit `INCIDENT_UPDATE`. |
 
 Admin incident queue and "my reports" are direct reads. Attachment viewing: admin reads Storage directly (storage rule allows ADMIN).
