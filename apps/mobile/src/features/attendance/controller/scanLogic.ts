@@ -25,7 +25,6 @@ export function acceptScan(gate: ScanGate, value: string, now: number): ScanGate
 
 const KIND_BY_CODE: Partial<Record<AppError['code'], ScanErrorKind>> = {
   INVALID_QR: 'INVALID_QR',
-  TICKET_NOT_FOUND: 'TICKET_NOT_FOUND',
   WRONG_WORKSHOP: 'WRONG_WORKSHOP',
   NO_BOOKING: 'NO_BOOKING',
   ALREADY_ATTENDED: 'ALREADY_ATTENDED',

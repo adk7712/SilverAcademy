@@ -72,9 +72,6 @@ export function ScanResultBanner({ outcome, source, onNext }: Props) {
           <AppText variant="title" style={{ color: fg }}>
             {outcome.workshopTitle}
           </AppText>
-          {outcome.method === 'MANUAL' ? (
-            <AppText style={{ color: fg }}>{s.successMethodCode}</AppText>
-          ) : null}
           {shouldShowPoints(source, outcome.pointsAwarded) ? (
             <AppText variant="bodyStrong" style={{ color: fg }}>
               {format(s.successPoints, { points: outcome.pointsAwarded })}

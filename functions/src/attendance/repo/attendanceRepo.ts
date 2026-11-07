@@ -1,13 +1,10 @@
-// UC #1-4, #3-4 ScanAttendance: ticket lookup and the attendance transaction (architecture.md 4.2, 4.3).
+// UC #1-4, #3-4 ScanAttendance: the attendance transaction (architecture.md 4.2, 4.3).
 import { FieldValue, Timestamp, type Firestore } from 'firebase-admin/firestore';
-import {
-  AppError,
-  isValidTicketCode,
-  normaliseTicketCode,
-  type Attendance,
-  type AttendanceMethod,
-  type Role,
-  type VolunteerAssignment,
+import type {
+  Attendance,
+  AttendanceMethod,
+  Role,
+  VolunteerAssignment,
 } from '@silveracademy/shared';
 import {
   COL,
@@ -20,28 +17,13 @@ import {
 } from '../../common';
 import { decideAttendance, type AttendanceDecision } from '../controller/decideAttendance';
 
-/** Bookings of `workshopId` with this ticket code; 0 or >1 matches -> TICKET_NOT_FOUND (#1-4 Ex4). */
-export async function findBookingIdByTicket(
-  db: Firestore,
-  workshopId: string,
-  ticketCode: string,
-): Promise<string> {
-  if (!isValidTicketCode(ticketCode)) throw new AppError('TICKET_NOT_FOUND');
-  const snap = await refs
-    .bookings(db)
-    .where('workshopId', '==', workshopId)
-    .where('ticketCode', '==', normaliseTicketCode(ticketCode))
-    .limit(2)
-    .get();
-  if (snap.size !== 1) throw new AppError('TICKET_NOT_FOUND');
-  return snap.docs[0]!.id;
-}
-
 export interface RecordAttendanceArgs {
   workshopId: string;
   bookingId: string;
   method: AttendanceMethod;
   scanner: { uid: string; roles: readonly Role[] };
+  /** Learner who checked in with the session code; `scanner` is then the instructor who set it. */
+  learnerId?: string;
   ignoreCheckInWindow: boolean;
   now: Date;
 }
@@ -109,8 +91,8 @@ export async function recordAttendanceTx(
       bookingId: args.bookingId,
     });
     writeAuditTx(db, tx, {
-      actorId: args.scanner.uid,
-      actorRole: decision.scannedByRole,
+      actorId: args.learnerId ?? args.scanner.uid,
+      actorRole: args.learnerId ? 'LEARNER' : decision.scannedByRole,
       action: 'ATTENDANCE_RECORD',
       outcome: 'SUCCESS',
       targetType: 'WORKSHOP',

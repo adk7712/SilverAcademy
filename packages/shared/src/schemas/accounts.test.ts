@@ -11,7 +11,7 @@ import { bad, ok } from './schemaTestHelpers';
 
 describe('registry', () => {
   it('has every functions.md callable with input and output schemas', () => {
-    expect(CALLABLE_NAMES).toHaveLength(35);
+    expect(CALLABLE_NAMES).toHaveLength(37);
     for (const n of CALLABLE_NAMES) {
       expect(CALLABLES[n].input).toBeDefined();
       expect(CALLABLES[n].output).toBeDefined();
@@ -100,11 +100,12 @@ describe('bookings and attendance', () => {
     ok(b.bookWorkshopOutput, out);
     bad(b.bookWorkshopOutput, { ...out, workshopSnapshot: { ...snap, startAt: 'tomorrow' } });
   });
-  it('recordAttendance takes exactly one of qrPayload or ticketCode', () => {
+  it('recordAttendance takes a QR payload only; check-in codes are trimmed and upper-cased', () => {
     ok(a.recordAttendanceInput, { workshopId: 'w', qrPayload: 'SA1.a.b' });
-    ok(a.recordAttendanceInput, { workshopId: 'w', ticketCode: 'ABCD-1234' });
     bad(a.recordAttendanceInput, { workshopId: 'w' });
     bad(a.recordAttendanceInput, { workshopId: 'w', qrPayload: 'a', ticketCode: 'b' });
+    expect(a.checkInInput.parse({ bookingId: 'b', code: ' sun42 ' }).code).toBe('SUN42');
+    bad(a.setCheckInCodeInput, { workshopId: 'w', code: 'abc' });
   });
 });
 

@@ -1,4 +1,4 @@
-// UC #1-4, #3-4 ScanAttendance: attendance-recordAttendance (QR or manual ticket code), architecture.md 4.3.
+// UC #1-4, #3-4 ScanAttendance: attendance-recordAttendance (QR only), architecture.md 4.3.
 import { ATTENDANCE_STAFF_ROLES } from '@silveracademy/shared';
 import {
   defineCallable,
@@ -8,8 +8,7 @@ import {
   type CallableResultOf,
   type CallerOptions,
 } from '../../common';
-import { methodOf } from '../controller/decideAttendance';
-import { findBookingIdByTicket, recordAttendanceTx } from '../repo/attendanceRepo';
+import { recordAttendanceTx } from '../repo/attendanceRepo';
 
 const ACCESS: CallerOptions = { roles: ATTENDANCE_STAFF_ROLES };
 
@@ -24,7 +23,7 @@ export interface RecordAttendanceOptions {
 }
 
 /**
- * Pre-tx: QR -> verifyQr (INVALID_QR) or ticket code -> query (TICKET_NOT_FOUND). Then one transaction.
+ * Pre-tx: verifyQr (INVALID_QR). Then one transaction.
  * Exported so tests can call it directly against the emulator.
  */
 export async function recordAttendance(
@@ -32,11 +31,8 @@ export async function recordAttendance(
   opts: RecordAttendanceOptions = {},
 ): Promise<CallableResultOf<'attendance-recordAttendance'>> {
   const { input, caller, db, now } = ctx;
-  const method = methodOf(input);
-  const bookingId =
-    'qrPayload' in input
-      ? verifyQr(input.qrPayload)
-      : await findBookingIdByTicket(db, input.workshopId, input.ticketCode);
+  const method = 'QR';
+  const bookingId = verifyQr(input.qrPayload);
   const decision = await recordAttendanceTx(db, {
     workshopId: input.workshopId,
     bookingId,

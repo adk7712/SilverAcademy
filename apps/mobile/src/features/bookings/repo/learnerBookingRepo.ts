@@ -40,3 +40,6 @@ export async function readCachedTickets(uid: string) {
 
 export const cancelOwnBooking = (workshopId: string) =>
   callFunction('bookings-cancelBooking', { workshopId });
+
+export const checkInWithCode = (bookingId: string, code: string) =>
+  callFunction('attendance-checkIn', { bookingId, code });

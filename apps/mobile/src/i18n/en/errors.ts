@@ -38,7 +38,7 @@ export const errorStrings: Record<AppErrorCode, string> = {
   CANNOT_BOOK_OWN_WORKSHOP: 'You cannot book your own workshop.',
 
   INVALID_QR: 'This is not a valid SilverAcademy ticket.',
-  TICKET_NOT_FOUND: 'We could not find a ticket with that code.',
+  CHECKIN_CODE_INVALID: 'That session code is not right. Ask the instructor for the code.',
   WRONG_WORKSHOP: 'This ticket is for a different workshop.',
   NO_BOOKING: 'There is no active booking for this ticket.',
   ALREADY_ATTENDED: 'This ticket has already been checked in.',

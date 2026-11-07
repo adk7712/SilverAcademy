@@ -53,14 +53,6 @@ export function useScanController(workshopId: string) {
     [state.phase, submit],
   );
 
-  const submitManual = useCallback(
-    (code: string) => {
-      const ticketCode = code.trim();
-      if (ticketCode) void submit({ ticketCode });
-    },
-    [submit],
-  );
-
   const reset = useCallback(() => dispatch({ type: 'RESET' }), []);
 
   useEffect(() => {
@@ -69,5 +61,5 @@ export function useScanController(workshopId: string) {
     return () => clearTimeout(t);
   }, [state, reset]);
 
-  return { state, onBarcode, submitManual, reset };
+  return { state, onBarcode, reset };
 }

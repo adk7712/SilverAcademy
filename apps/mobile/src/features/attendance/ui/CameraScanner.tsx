@@ -10,7 +10,7 @@ const CAMERA_HEIGHT = 320;
 
 interface Props {
   onCode: (raw: string) => void;
-  onUseManual: () => void;
+  onUseManual?: (() => void) | undefined;
 }
 
 export function CameraScanner({ onCode, onUseManual }: Props) {
@@ -34,7 +34,9 @@ export function CameraScanner({ onCode, onUseManual }: Props) {
         ) : Platform.OS !== 'web' ? (
           <Button label={s.openSettings} onPress={() => void Linking.openSettings()} />
         ) : null}
-        <Button label={s.useCode} variant="secondary" onPress={onUseManual} />
+        {onUseManual ? (
+          <Button label={s.useCode} variant="secondary" onPress={onUseManual} />
+        ) : null}
       </View>
     );
   }

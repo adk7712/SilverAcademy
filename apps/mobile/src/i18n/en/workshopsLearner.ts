@@ -73,7 +73,7 @@ export const workshopsLearner = {
   blockedStarted: 'This workshop has already started.',
   blockedFull: 'Sorry, this workshop is full.',
   confirmedTitle: 'Booking confirmed',
-  confirmedBody: 'Your ticket code is {code}. Show your ticket at the door.',
+  confirmedBody: 'Show your ticket at the door.',
   seatsRemaining: '{n} seats remaining.',
   organiserTitle: 'Organiser',
   sourceButton: 'View the original listing',

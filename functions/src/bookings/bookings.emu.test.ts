@@ -248,23 +248,18 @@ describe('bookings-cancelBooking (emulator)', () => {
 });
 
 describe('cancelled booking integrations (emulator)', () => {
-  it('rejects the cancelled QR and manual ticket without recording attendance', async () => {
+  it('rejects the cancelled QR without recording attendance', async () => {
     const id = await makeWorkshop(1);
     const ticket = await book(id, 'invalid-ticket');
     await cancelBooking(db, caller('invalid-ticket'), id, NOW);
-    for (const input of [
-      { workshopId: id, qrPayload: ticket.qrPayload },
-      { workshopId: id, ticketCode: ticket.ticketCode },
-    ]) {
-      await expect(
-        recordAttendance({
-          db,
-          caller: caller('si-owner', ['SENIOR_INSTRUCTOR']),
-          input,
-          now: START,
-        }),
-      ).rejects.toMatchObject({ code: 'NO_BOOKING' });
-    }
+    await expect(
+      recordAttendance({
+        db,
+        caller: caller('si-owner', ['SENIOR_INSTRUCTOR']),
+        input: { workshopId: id, qrPayload: ticket.qrPayload },
+        now: START,
+      }),
+    ).rejects.toMatchObject({ code: 'NO_BOOKING' });
     expect((await db.doc(`attendance/${ticket.bookingId}`).get()).exists).toBe(false);
     expect(await seats(id)).toBe(0);
   });

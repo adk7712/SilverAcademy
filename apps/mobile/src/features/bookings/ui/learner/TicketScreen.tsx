@@ -1,14 +1,16 @@
-// UC #2-3 ViewTicket: high-contrast QR, manual-fallback ticket code, attendance status; cached for offline (ADR-019).
+// UC #2-3 ViewTicket: high-contrast QR, session-code check-in fallback, attendance status; cached for offline (ADR-019).
+import { useState } from 'react';
 import { View } from 'react-native';
-import { formatTicketCode } from '@silveracademy/shared';
 import {
   AppText,
   Badge,
+  Button,
   Card,
   EmptyState,
   ErrorBanner,
   LoadingState,
   Screen,
+  TextField,
   useTheme,
 } from '../../../../design';
 import { format, strings } from '../../../../i18n';
@@ -19,11 +21,46 @@ import { CancelBookingAction } from './CancelBookingAction';
 import { useLearnerBookings } from '../../controller/useLearnerBookings';
 import { QrCodeView } from './QrCodeView';
 
+const s = strings.bookingsLearner;
+
+/** Fallback when the QR cannot be scanned: type the code the instructor announces. */
+function SessionCodeCheckIn({ onSubmit }: { onSubmit: (code: string) => Promise<string | null> }) {
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const submit = async () => {
+    setBusy(true);
+    setError(await onSubmit(code));
+    setBusy(false);
+  };
+  return (
+    <Card>
+      <AppText variant="title">{s.sessionCodeTitle}</AppText>
+      <TextField
+        label={s.sessionCodeLabel}
+        helper={s.sessionCodeHelp}
+        value={code}
+        onChangeText={setCode}
+        autoCapitalize="characters"
+        autoCorrect={false}
+        error={error ?? undefined}
+        testID="session-code-input"
+      />
+      <Button
+        label={s.sessionCodeSubmit}
+        loading={busy}
+        disabled={code.trim().length < 4}
+        onPress={() => void submit()}
+        testID="session-code-submit"
+      />
+    </Card>
+  );
+}
+
 export function TicketScreen() {
   const { spacing } = useTheme();
-  const s = strings.bookingsLearner;
   const { bookingId } = useAppRoute<'Ticket'>().params;
-  const { bookings, loading, error, cachedAt, reload, cancelling, cancelError, cancel } =
+  const { bookings, loading, error, cachedAt, reload, cancelling, cancelError, cancel, checkIn } =
     useLearnerBookings();
   const booking = bookings.find((b) => b.id === bookingId);
 
@@ -50,18 +87,9 @@ export function TicketScreen() {
         {valid ? (
           <>
             <QrCodeView value={booking.qrPayload} label={s.qrLabel} />
-            <Card>
-              <AppText variant="title">{s.ticketCodeTitle}</AppText>
-              <AppText
-                variant="display"
-                selectable
-                accessibilityLabel={`${s.ticketCodeTitle} ${formatTicketCode(booking.ticketCode).split('').join(' ')}`}
-                style={{ letterSpacing: 4, textAlign: 'center' }}
-              >
-                {formatTicketCode(booking.ticketCode)}
-              </AppText>
-              <AppText color="textMuted">{s.ticketCodeHelp}</AppText>
-            </Card>
+            {booking.status === 'CONFIRMED' && !cachedAt ? (
+              <SessionCodeCheckIn onSubmit={(code) => checkIn(booking.id, code)} />
+            ) : null}
           </>
         ) : (
           <ErrorBanner message={s.cancelledNote} />
