@@ -13,6 +13,7 @@ export const categoryLabels: Record<WorkshopCategory, string> = {
 };
 
 const statusLabels: Record<WorkshopStatus, string> = {
+  PENDING_REVIEW: 'Waiting for curriculum review',
   DRAFT: 'Draft: needs a venue',
   PENDING_VENUE: 'Waiting for venue reply',
   OPEN: 'Open for booking',
@@ -42,7 +43,8 @@ export const workshopsInstructor = {
   quickCreateHint: 'Start a new workshop',
   quickScanHint: 'Check in learners',
   quickWalletHint: 'Points and vouchers',
-  formIntro: 'Fill in the details. You will choose a venue next.',
+  formIntro:
+    'Fill in the details. An administrator reviews the curriculum before you choose a venue.',
   fieldTitle: 'Workshop title',
   fieldDescription: 'Description',
   fieldCategory: 'Category',
@@ -53,7 +55,7 @@ export const workshopsInstructor = {
   fieldVolunteerSlots: 'Volunteers needed',
   yes: 'Yes',
   no: 'No',
-  saveDraft: 'Save and choose venue',
+  saveDraft: 'Submit for review',
   errTitleRequired: 'Please enter a title.',
   errTitleTooLong: 'The title is too long (maximum {max} characters).',
   errDescriptionRequired: 'Please describe your workshop.',
@@ -62,7 +64,7 @@ export const workshopsInstructor = {
   errCapacityInvalid: 'Enter a whole number from {min} to {max}.',
   errMaterialsTooLong: 'Too long (maximum {max} characters).',
   errVolunteerSlotsInvalid: 'Enter a whole number from 1 to {max}.',
-  created: 'Workshop saved. Now choose a venue.',
+  created: 'Workshop submitted. You can request a venue once it is approved.',
   formHasErrors: 'Please fix the highlighted fields.',
   notApprovedTitle: 'Profile approval needed',
 } as const;

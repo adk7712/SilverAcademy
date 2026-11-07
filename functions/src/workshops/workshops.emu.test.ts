@@ -53,17 +53,17 @@ describe('workshops-createWorkshop / updateWorkshop (emulator)', () => {
     volunteerSlots: 2,
   };
 
-  it('needs an APPROVED profile; creates a DRAFT; owner edits DRAFT only', async () => {
+  it('needs an APPROVED profile; creates PENDING_REVIEW; owner edits before venue', async () => {
     const uid = uniq('si');
     const caller = callerOf(uid, 'SENIOR_INSTRUCTOR');
     expect(await code(createWorkshop({ ...base, caller, input }))).toBe('PROFILE_NOT_APPROVED');
     await db.doc(`instructorProfiles/${uid}`).set({ uid, status: 'APPROVED' });
     const res = await createWorkshop({ ...base, caller, input });
-    expect(res.status).toBe('DRAFT');
+    expect(res.status).toBe('PENDING_REVIEW');
     expect(await get(`workshops/${res.workshopId}`)).toMatchObject({
       instructorId: uid,
       instructorName: `Name ${uid}`,
-      status: 'DRAFT',
+      status: 'PENDING_REVIEW',
       seatsTaken: 0,
       volunteersAssigned: 0,
       activeVenueRequestId: null,

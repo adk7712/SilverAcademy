@@ -154,6 +154,15 @@ export async function adminSetStatus(
     ) {
       tx.update(request.ref, { status: 'WITHDRAWN', updatedAt: FieldValue.serverTimestamp() });
     }
+    if (input.status === 'APPROVE') {
+      notifyTx(db, tx, {
+        userId: w.instructorId,
+        type: 'CURRICULUM_APPROVED',
+        title: `Curriculum approved: ${w.title}`,
+        body: 'You can now request a venue for this workshop.',
+        refPath: paths.workshop(w.id),
+      });
+    }
     for (const b of notifyBookings) {
       notifyTx(db, tx, {
         userId: b.learnerId,

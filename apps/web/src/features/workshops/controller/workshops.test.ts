@@ -36,6 +36,11 @@ describe('availableStatusActions', () => {
       'CANCELLED',
       'ARCHIVED',
     ]);
+    expect(availableStatusActions({ status: 'PENDING_REVIEW' })).toEqual([
+      'APPROVE',
+      'CANCELLED',
+      'ARCHIVED',
+    ]);
     expect(availableStatusActions({ status: 'DRAFT' })).toEqual(['CANCELLED', 'ARCHIVED']);
     expect(availableStatusActions({ status: 'PENDING_VENUE' })).toEqual(['CANCELLED', 'ARCHIVED']);
     expect(availableStatusActions({ status: 'COMPLETED' })).toEqual(['ARCHIVED']);

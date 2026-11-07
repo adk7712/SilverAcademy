@@ -48,6 +48,7 @@ export const INSTRUCTOR_REVIEW_DECISIONS = def(['APPROVE', 'REJECT', 'REQUEST_RE
 export type InstructorReviewDecision = (typeof INSTRUCTOR_REVIEW_DECISIONS)[number];
 
 export const WORKSHOP_STATUSES = def([
+  'PENDING_REVIEW',
   'DRAFT',
   'PENDING_VENUE',
   'OPEN',
@@ -56,8 +57,14 @@ export const WORKSHOP_STATUSES = def([
   'ARCHIVED',
 ]);
 export type WorkshopStatus = (typeof WORKSHOP_STATUSES)[number];
-/** Admin status actions; UNARCHIVE restores statusBeforeArchive. */
-export const WORKSHOP_ADMIN_ACTIONS = def(['ARCHIVED', 'UNARCHIVE', 'COMPLETED', 'CANCELLED']);
+/** Admin status actions; UNARCHIVE restores statusBeforeArchive; APPROVE passes curriculum review (-> DRAFT). */
+export const WORKSHOP_ADMIN_ACTIONS = def([
+  'ARCHIVED',
+  'UNARCHIVE',
+  'COMPLETED',
+  'CANCELLED',
+  'APPROVE',
+]);
 export type WorkshopAdminAction = (typeof WORKSHOP_ADMIN_ACTIONS)[number];
 export const WORKSHOP_CATEGORIES = def([
   'ARTS_CRAFTS',
@@ -131,6 +138,7 @@ export const NOTIFICATION_TYPES = def([
   'VENUE_REQUEST_NEW',
   'BOOKING_CONFIRMED',
   'WORKSHOP_CANCELLED',
+  'CURRICULUM_APPROVED',
   'PROFILE_REVIEWED',
   'INCIDENT_UPDATED',
   'ACCOUNT_STATUS_CHANGED',

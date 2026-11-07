@@ -45,7 +45,7 @@ export function decideCreateWorkshop(
 }
 
 /**
- * Order: workshop missing -> NOT_FOUND; not owner -> PERMISSION_DENIED; status != DRAFT -> WORKSHOP_NOT_EDITABLE;
+ * Order: workshop missing -> NOT_FOUND; not owner -> PERMISSION_DENIED; not DRAFT / PENDING_REVIEW -> WORKSHOP_NOT_EDITABLE;
  * merged needsVolunteers/volunteerSlots inconsistent -> INVALID_INPUT. Returns only the changed fields.
  */
 export function decideUpdateWorkshop(
@@ -55,7 +55,8 @@ export function decideUpdateWorkshop(
 ): WorkshopPatch {
   if (!workshop) throw new AppError('NOT_FOUND');
   if (workshop.instructorId !== uid) throw new AppError('PERMISSION_DENIED');
-  if (workshop.status !== 'DRAFT') throw new AppError('WORKSHOP_NOT_EDITABLE');
+  if (workshop.status !== 'DRAFT' && workshop.status !== 'PENDING_REVIEW')
+    throw new AppError('WORKSHOP_NOT_EDITABLE');
   const merged = { ...workshop, ...stripUndefined(patch) };
   assertVolunteerRule(merged);
   return stripUndefined(patch);
