@@ -1,6 +1,7 @@
 // Volunteer shell tabs: Opportunities, Assigned, Scan, Profile (Profile holds logout and Report an issue).
 import { useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../design';
 import { strings } from '../i18n';
 import {
@@ -25,24 +26,40 @@ const ScanStack = createStack([{ name: 'VolunteerScan', component: ScanAttendanc
 
 export function VolunteerTabs() {
   const theme = useTheme();
-  const options = useMemo(() => tabScreenOptions(theme), [theme]);
+  const { bottom } = useSafeAreaInsets();
+  const options = useMemo(() => tabScreenOptions(theme, bottom), [theme, bottom]);
   return (
     <Tab.Navigator screenOptions={options}>
       <Tab.Screen
         name="OpportunitiesTab"
         component={OpportunitiesStack}
-        options={{ title: strings.nav.tabs.opportunities }}
+        options={{
+          title: strings.nav.tabs.opportunities,
+        }}
       />
+
       <Tab.Screen
         name="AssignedTab"
         component={AssignedStack}
-        options={{ title: strings.nav.tabs.assigned }}
+        options={{
+          title: strings.nav.tabs.assigned,
+        }}
       />
-      <Tab.Screen name="ScanTab" component={ScanStack} options={{ title: strings.nav.tabs.scan }} />
+
+      <Tab.Screen
+        name="ScanTab"
+        component={ScanStack}
+        options={{
+          title: strings.nav.tabs.scan,
+        }}
+      />
+
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStack}
-        options={{ title: strings.nav.tabs.profile }}
+        options={{
+          title: strings.nav.tabs.profile,
+        }}
       />
     </Tab.Navigator>
   );

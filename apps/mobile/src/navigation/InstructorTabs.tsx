@@ -1,6 +1,7 @@
 // Instructor shell tabs: Dashboard (direct access to Create Workshop, Scan Attendance, Wallet), Report, Profile.
 import { useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../design';
 import { strings } from '../i18n';
 import { CreateWorkshopScreen, InstructorDashboardScreen } from '../features/workshops';
@@ -28,23 +29,32 @@ const DashboardStack = createStack([
 
 export function InstructorTabs() {
   const theme = useTheme();
-  const options = useMemo(() => tabScreenOptions(theme), [theme]);
+  const { bottom } = useSafeAreaInsets();
+  const options = useMemo(() => tabScreenOptions(theme, bottom), [theme, bottom]);
   return (
     <Tab.Navigator screenOptions={options}>
       <Tab.Screen
         name="DashboardTab"
         component={DashboardStack}
-        options={{ title: strings.nav.tabs.dashboard }}
+        options={{
+          title: strings.nav.tabs.dashboard,
+        }}
       />
+
       <Tab.Screen
         name="ReportTab"
         component={ReportStack}
-        options={{ title: strings.nav.tabs.report }}
+        options={{
+          title: strings.nav.tabs.report,
+        }}
       />
+
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStack}
-        options={{ title: strings.nav.tabs.profile }}
+        options={{
+          title: strings.nav.tabs.profile,
+        }}
       />
     </Tab.Navigator>
   );
