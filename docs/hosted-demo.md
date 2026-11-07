@@ -1,6 +1,6 @@
 # Hosted Demo
 
-The prototype also runs online, so it can be tried from any browser without the emulators. This page lists the links, how the hosted setup differs from local development, and how to redeploy. Decision record: ADR-026 and ADR-027 in `decisions.md`. Limits: section 8 of `known-limitations.md`.
+The prototype also runs online, so it can be tried from any browser without the emulators. This page lists the links, how the hosted setup differs from local development, and how to redeploy. Decision record: ADR-027 and ADR-028 in `decisions.md`. Limits: section 8 of `known-limitations.md`.
 
 The hosted demo is for showing the prototype. It uses **mock Singpass** and seeded demo data. Do not enter real personal data.
 
@@ -35,7 +35,7 @@ Each pull request also gets preview URLs from Vercel (posted as a PR comment by 
 | | Local | Hosted |
 |---|---|---|
 | Backend | Firebase emulators (`demo-silveracademy`) | Real Firebase project `silveracademy-demo-adk` |
-| Singpass | mock, allowed because it is an emulator | mock, allowed only with `ALLOW_MOCK_AUTH=true` (ADR-027) |
+| Singpass | mock, allowed because it is an emulator | mock, allowed only with `ALLOW_MOCK_AUTH=true` (ADR-028) |
 | Web client | `VITE_USE_EMULATORS` defaults to on | `VITE_USE_EMULATORS=false` in Vercel |
 | Mobile client | `EXPO_PUBLIC_USE_EMULATORS=true` | `EXPO_PUBLIC_USE_EMULATORS=false` (the default) |
 | Seed | emulator hosts set, project id starts with `demo-` | cloud opt-in, see section 5 |

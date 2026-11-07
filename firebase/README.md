@@ -6,4 +6,4 @@ Emulator config (`firebase.json`), security rules (`firestore.rules`, `storage.r
 - Rules tests: `npm run test:emulator` (starts auth/firestore/storage emulators, runs `rules-tests/*.rules.test.ts` and `functions/src/**/*.emu.test.ts`, shuts down).
 - The functions emulator loads the esbuild bundle `functions/lib/index.js`; `firebase.json` predeploy runs the build, and `npm run emulators` builds first.
 - Hosted deploy: the root `firebase.deploy.json` points at this folder's rules and indexes and at the staged functions bundle in `.deploy/functions` (built by `prepare-functions-deploy.mjs`, git-ignored). Commands: `docs/hosted-demo.md` section 5.
-- Cloud seed: `npm run seed` writes to a real project only with `SEED_CLOUD_PROJECT` equal to `GCLOUD_PROJECT`, no emulator hosts, and explicit `SEED_ADMIN_PASSWORD`, `SEED_PARTNER_PASSWORD` and `QR_HMAC_SECRET` (`seed/guard.ts`, ADR-027).
+- Cloud seed: `npm run seed` writes to a real project only with `SEED_CLOUD_PROJECT` equal to `GCLOUD_PROJECT`, no emulator hosts, and explicit `SEED_ADMIN_PASSWORD`, `SEED_PARTNER_PASSWORD` and `QR_HMAC_SECRET` (`seed/guard.ts`, ADR-028).

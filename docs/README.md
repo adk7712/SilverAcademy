@@ -13,7 +13,7 @@ Start here: the root `README.md` (overview and quick start), then `dev-guide.md`
 | `next-steps.md` | Prioritised list (P1, P2, P3) for the next developer |
 | `requirements-map.md` | Use case -> module -> screen -> data, NFR map, spec ambiguities |
 | `architecture.md` | Layers, data model, transaction designs, service interfaces |
-| `decisions.md` | ADR log (ADR-001 to ADR-027) |
+| `decisions.md` | ADR log (ADR-001 to ADR-028) |
 | `review-findings.md` | Task 3.2 review of concurrency, atomicity, RBAC and layering, with per-finding status |
 | `api/README.md` | Cloud Function and module API notes |
 | `api/functions.md` | Callable function catalogue (source of truth for names, inputs, outputs, errors) |

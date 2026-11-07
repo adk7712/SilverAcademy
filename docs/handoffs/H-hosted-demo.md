@@ -11,7 +11,7 @@ Sonnet 5.5, with the project owner approving the Firebase project, billing, IAM 
 - Real Firebase project `silveracademy-demo-adk` (Blaze, `asia-southeast1`): Auth email/password, Firestore with rules and indexes, Storage, 33 callables, seeded demo data.
 - Opt-in mock auth outside emulators (`ALLOW_MOCK_AUTH`), cloud seed opt-in (`SEED_CLOUD_PROJECT`), staged functions deploy (`firebase.deploy.json`, `firebase/prepare-functions-deploy.mjs`).
 - Bug fix found on the hosted staff login: `ensureApp()` in `functions/src/common/firebase.ts` now checks the default Admin app, because `firebase-functions` registers a named app first in the cloud. Before the fix, `auth-recordStaffLogin` crashed and the UI showed "Invalid Credentials".
-- Docs: `docs/hosted-demo.md`, ADR-026, ADR-027, known limitations section 8, next steps 27 to 29, and hosted notes in the READMEs and `.env.example`.
+- Docs: `docs/hosted-demo.md`, ADR-027, ADR-028, known limitations section 8, next steps 27 to 29, and hosted notes in the READMEs and `.env.example`.
 
 ## Files touched
 `vercel.json`, `apps/mobile/vercel.json`, `firebase.deploy.json`, `firebase/prepare-functions-deploy.mjs`, `firebase/seed/guard.ts`, `functions/src/common/config.ts` (+ test), `functions/src/common/firebase.ts`, `functions/src/auth/singpassVerifier.ts`, `.gitignore`, and the docs listed above.

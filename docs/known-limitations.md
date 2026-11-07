@@ -162,11 +162,11 @@ Links and setup: `hosted-demo.md`.
 
 | # | Area | Limitation | Source |
 |---|------|------------|--------|
-| H1 | Open mock login | The hosted functions run with `ALLOW_MOCK_AUTH=true`. Anyone who can reach the public URLs can sign in as any mock profile (including instructors and volunteers). Staff accounts still need a password. Data is fictional. Not acceptable for real use. | ADR-027 |
+| H1 | Open mock login | The hosted functions run with `ALLOW_MOCK_AUTH=true`. Anyone who can reach the public URLs can sign in as any mock profile (including instructors and volunteers). Staff accounts still need a password. Data is fictional. Not acceptable for real use. | ADR-028 |
 | H2 | Weak staff passwords | Hosted staff passwords may be short demo values chosen by the owner (Firebase needs at least 6 characters). Anyone who learns them has admin or partner access to the demo data. Rotate or disable before any real use. | hosted setup |
-| H3 | Shared backend | Vercel PR previews and production use the same Firebase project. Actions in a preview change the shared demo data. Reseed to reset (`hosted-demo.md` section 5). | ADR-026 |
+| H3 | Shared backend | Vercel PR previews and production use the same Firebase project. Actions in a preview change the shared demo data. Reseed to reset (`hosted-demo.md` section 5). | ADR-027 |
 | H4 | Check-in window | `DEMO_IGNORE_CHECKIN_WINDOW` is ignored outside emulators, so attendance on the hosted demo only works inside the real window (60 minutes before to 30 minutes after the start). | `config.ts` |
 | H5 | Not verified on hosted | Camera scanning, location, the offline ticket and file upload were not exercised on the hosted apps. Only login on both apps and the public callables were checked. | 2026-11-02 |
-| H6 | Manual deploys | Functions, rules and seed are deployed by hand with the Firebase CLI. Only the web and mobile builds deploy automatically from GitHub. A change in `functions/` or `firebase/` does not reach the hosted demo until someone runs the steps in `hosted-demo.md` section 5. | ADR-026 |
+| H6 | Manual deploys | Functions, rules and seed are deployed by hand with the Firebase CLI. Only the web and mobile builds deploy automatically from GitHub. A change in `functions/` or `firebase/` does not reach the hosted demo until someone runs the steps in `hosted-demo.md` section 5. | ADR-027 |
 | H7 | Billing | The Firebase project is on Blaze. Usage should stay in the free quota, but a budget alert is not configured by the repo. | hosted setup |
 | H8 | Mobile web only | The mobile app is hosted as a static web build (`expo export -p web`). Native-only features behave as on the mobile web preview. | `apps/mobile/vercel.json` |
