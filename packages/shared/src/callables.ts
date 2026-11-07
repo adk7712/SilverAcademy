@@ -136,6 +136,10 @@ export const CALLABLES = {
     input: reports.updateIncidentInput,
     output: reports.updateIncidentOutput,
   },
+  'reports-respondToIncident': {
+    input: reports.respondToIncidentInput,
+    output: reports.respondToIncidentOutput,
+  },
 } as const;
 
 export type CallableName = keyof typeof CALLABLES;

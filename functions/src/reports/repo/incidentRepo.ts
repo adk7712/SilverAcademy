@@ -1,4 +1,4 @@
-// incidents/{refNo} access: submit (UC #2-5) and admin update (UC #5-3). Admin SDK only.
+// incidents/{refNo} access: submit and reporter reply (UC #2-5), admin update (UC #5-3). Admin SDK only.
 import { randomBytes } from 'node:crypto';
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
@@ -141,5 +141,37 @@ export async function updateIncident(
       refPath: `${COL.incidents}/${input.incidentId}`,
     });
     return { status: d.status, version: d.version };
+  });
+}
+
+/** Reporter answers an AWAITING_INFO request: store the reply, back to UNDER_REVIEW, audit. */
+export async function respondToIncident(
+  db: Firestore,
+  caller: Pick<Caller, 'uid'>,
+  input: { incidentId: string; response: string },
+): Promise<{ status: 'UNDER_REVIEW' }> {
+  const ref = db.collection(COL.incidents).doc(input.incidentId);
+  return runTx(db, async (tx) => {
+    const incident = (await tx.get(ref)).data() as Incident | undefined;
+    if (incident?.reporterId !== caller.uid) throw new AppError('NOT_FOUND');
+    if (incident.status !== 'AWAITING_INFO') {
+      throw new AppError('INVALID_TRANSITION', undefined, { from: incident.status });
+    }
+    tx.update(ref, {
+      status: 'UNDER_REVIEW',
+      infoResponse: input.response,
+      version: incident.version + 1,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    writeAuditTx(db, tx, {
+      actorId: caller.uid,
+      actorRole: incident.reporterRole,
+      action: 'INCIDENT_UPDATE',
+      outcome: 'SUCCESS',
+      targetType: 'INCIDENT',
+      targetId: input.incidentId,
+      details: { from: 'AWAITING_INFO', to: 'UNDER_REVIEW', infoResponse: input.response },
+    });
+    return { status: 'UNDER_REVIEW' as const };
   });
 }

@@ -14,5 +14,6 @@ export interface MyReport {
   status: IncidentStatus;
   createdAt: Date | null;
   infoRequest?: string;
+  infoResponse?: string;
   resolution?: string;
 }

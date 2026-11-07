@@ -11,7 +11,7 @@ import { bad, ok } from './schemaTestHelpers';
 
 describe('registry', () => {
   it('has every functions.md callable with input and output schemas', () => {
-    expect(CALLABLE_NAMES).toHaveLength(34);
+    expect(CALLABLE_NAMES).toHaveLength(35);
     for (const n of CALLABLE_NAMES) {
       expect(CALLABLES[n].input).toBeDefined();
       expect(CALLABLES[n].output).toBeDefined();

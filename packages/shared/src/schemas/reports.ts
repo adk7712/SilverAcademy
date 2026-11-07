@@ -33,3 +33,7 @@ export const updateIncidentOutput = z.object({
   status: z.enum(INCIDENT_STATUSES),
   version: expectedVersionSchema,
 });
+
+/** Reporter answers an AWAITING_INFO request; the incident returns to UNDER_REVIEW. */
+export const respondToIncidentInput = z.object({ incidentId: idSchema, response: incidentText });
+export const respondToIncidentOutput = z.object({ status: z.literal('UNDER_REVIEW') });

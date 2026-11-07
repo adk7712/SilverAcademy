@@ -28,6 +28,7 @@ function toIncident(id: string, d: DocumentData): IncidentView {
     status: d.status,
     resolution: d.resolution,
     infoRequest: d.infoRequest,
+    infoResponse: d.infoResponse,
     createdAt: toDate(d.createdAt),
     updatedAt: toDate(d.updatedAt),
   };

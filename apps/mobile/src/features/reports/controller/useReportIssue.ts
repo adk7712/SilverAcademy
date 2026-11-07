@@ -11,6 +11,7 @@ import { useSession } from '../../auth';
 import {
   deleteAttachment,
   listMyReports,
+  respondToIncident,
   submitReport,
   uploadAttachment,
 } from '../repo/reportRepo';
@@ -128,6 +129,17 @@ export function useReportIssue() {
     }
   };
 
+  /** Answers an AWAITING_INFO request. Resolves to an error message, or null. */
+  const reply = async (referenceNo: string, text: string) => {
+    try {
+      await respondToIncident(referenceNo, text.trim());
+      await loadReports();
+      return null;
+    } catch (e) {
+      return errorMessage(e);
+    }
+  };
+
   const reset = () => {
     setReferenceNo(null);
     setCategory(null);
@@ -157,5 +169,6 @@ export function useReportIssue() {
     submit,
     reset,
     reloadReports: loadReports,
+    reply,
   };
 }

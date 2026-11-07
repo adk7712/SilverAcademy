@@ -2,7 +2,12 @@
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { INCIDENT_REF_REGEX, type Role } from '@silveracademy/shared';
-import { submitReport, updateIncident, type AttachmentInspector } from './repo/incidentRepo';
+import {
+  respondToIncident,
+  submitReport,
+  updateIncident,
+  type AttachmentInspector,
+} from './repo/incidentRepo';
 
 if (getApps().length === 0) initializeApp({ projectId: process.env.GCLOUD_PROJECT });
 const db = getFirestore();
@@ -152,7 +157,11 @@ describe('reports-updateIncident (emulator)', () => {
         }),
       ),
     ).toBe('INVALID_TRANSITION');
-    await updateIncident(db, admin, { incidentId: id, status: 'UNDER_REVIEW', expectedVersion: 3 });
+    const reply = (uid: string) =>
+      respondToIncident(db, { uid }, { incidentId: id, response: 'Room 2' });
+    expect(await codeOf(reply('someone-else'))).toBe('NOT_FOUND');
+    expect(await reply(reporter.uid)).toEqual({ status: 'UNDER_REVIEW' });
+    expect(await codeOf(reply(reporter.uid))).toBe('INVALID_TRANSITION');
     expect(
       await updateIncident(db, admin, {
         incidentId: id,
@@ -184,6 +193,7 @@ describe('reports-updateIncident (emulator)', () => {
       status: 'CLOSED',
       resolution: 'Door fixed',
       infoRequest: 'Which room?',
+      infoResponse: 'Room 2',
       version: 6,
     });
     const audits = await db.collection('auditLogs').where('targetId', '==', id).get();
@@ -195,7 +205,7 @@ describe('reports-updateIncident (emulator)', () => {
       .collection('notifications')
       .where('refPath', '==', `incidents/${id}`)
       .get();
-    expect(notes.size).toBe(5);
+    expect(notes.size).toBe(4);
     expect(
       notes.docs.every(
         (d) => d.data().userId === reporter.uid && d.data().type === 'INCIDENT_UPDATED',

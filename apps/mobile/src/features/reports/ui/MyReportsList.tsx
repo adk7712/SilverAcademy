@@ -1,5 +1,14 @@
-// UC #2-5 "my reports": reference numbers with status so a report stays trackable.
-import { AppText, Badge, Card, ErrorBanner, type BadgeTone } from '../../../design';
+// UC #2-5 "my reports": reference numbers with status, and a reply when the admin asks for information.
+import { useState } from 'react';
+import {
+  AppText,
+  Badge,
+  Button,
+  Card,
+  ErrorBanner,
+  TextField,
+  type BadgeTone,
+} from '../../../design';
 import { format, strings } from '../../../i18n';
 import type { MyReport } from '../reportTypes';
 
@@ -12,14 +21,47 @@ const TONE: Record<MyReport['status'], BadgeTone> = {
   CLOSED: 'neutral',
 };
 
+type Reply = (referenceNo: string, text: string) => Promise<string | null>;
+
+function ReplyForm({ referenceNo, onReply }: { referenceNo: string; onReply: Reply }) {
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const send = async () => {
+    setBusy(true);
+    setError(await onReply(referenceNo, text));
+    setBusy(false);
+  };
+  return (
+    <>
+      <TextField
+        label={t.replyLabel}
+        value={text}
+        onChangeText={setText}
+        multiline
+        error={error ?? undefined}
+        testID={`report-reply-${referenceNo}`}
+      />
+      <Button
+        label={t.replySend}
+        loading={busy}
+        disabled={text.trim() === ''}
+        onPress={() => void send()}
+      />
+    </>
+  );
+}
+
 export function MyReportsList({
   reports,
   error,
   onRetry,
+  onReply,
 }: {
   reports: MyReport[];
   error: string | null;
   onRetry: () => void;
+  onReply: Reply;
 }) {
   return (
     <>
@@ -37,6 +79,12 @@ export function MyReportsList({
           <Badge label={t.status[r.status]} tone={TONE[r.status]} />
           {r.infoRequest ? (
             <AppText>{format(t.infoRequested, { text: r.infoRequest })}</AppText>
+          ) : null}
+          {r.infoResponse ? (
+            <AppText>{format(t.infoResponded, { text: r.infoResponse })}</AppText>
+          ) : null}
+          {r.status === 'AWAITING_INFO' ? (
+            <ReplyForm referenceNo={r.referenceNo} onReply={onReply} />
           ) : null}
           {r.resolution ? <AppText>{format(t.resolution, { text: r.resolution })}</AppText> : null}
         </Card>

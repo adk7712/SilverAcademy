@@ -21,6 +21,7 @@ export interface IncidentView {
   status: IncidentStatus;
   resolution?: string;
   infoRequest?: string;
+  infoResponse?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
