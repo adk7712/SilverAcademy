@@ -42,7 +42,7 @@ Mobile tasks (2.1 to 2.6):
 | 2.4 | Mobile scanner with manual ticket-code fallback, class roster | Sonnet | done | 2026-10-19 | `handoffs/2.4-mobile-scanner.md`. Camera not run on a device. |
 | 2.5 | Mobile Wallet, points history, redeem voucher | Sonnet | done | 2026-10-19 | `handoffs/2.5-mobile-wallet.md` |
 | 2.6 | Mobile Volunteer (opportunities, assist, assigned), Report an Issue, Profile notifications, learner feedback | Sonnet | done | 2026-10-19 | `handoffs/2.6-mobile-volunteer-reports.md` |
-| 2.11 | Copy, error strings, icon/asset wiring (mobile and web) | Haiku | todo | | No icon set installed; text-only tab bars. |
+| 2.11 | Copy, error strings, icon/asset wiring (mobile and web) | Haiku | todo | | Mobile tab icons done (Ionicons); web icons and copy pass remain. |
 
 Web tasks (2.7 to 2.10):
 

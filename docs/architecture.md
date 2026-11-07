@@ -32,7 +32,7 @@ Spec control classes are per role; ours are per feature. Mapping: LearnerControl
 | auth | Singpass login, registration choice, mode toggle | Staff login, route guards | `auth/` exchangeSingpass, recordStaffLogin; `SingpassVerifier` | Role, AccountStatus, mock Singpass profile fixtures, `AuthProvider` types |
 | users | Instructor profile submit, preferences (font scale) | Manage Accounts, Instructor Review | `users/` | User, InstructorProfile types/enums |
 | workshops | Create workshop, directory/search, details, volunteer opportunities/assist, feedback | Manage Workshops | `workshops/` (CRUD, admin status, volunteers, feedback) | Workshop types, categories, `filterWorkshops`, `recommendWorkshops`, `isCheckInWindowOpen` |
-| bookings | Book, My Bookings, Digital Ticket (offline cache), roster view | (reads only for admin) | `bookings/` bookWorkshop, getRoster | Booking types, ticket code normaliser |
+| bookings | Book, My Bookings, Digital Ticket (offline cache), roster view | (reads only for admin) | `bookings/` bookWorkshop, cancelBooking, getRoster | Booking types, ticket code normaliser |
 | attendance | Scanner + manual ticket code entry (SI and Volunteer) | none | `attendance/` recordAttendance | Attendance types, QR payload parser (format only) |
 | vouchers | Wallet, points history, redeem, my vouchers | Voucher Inventory, upload | `vouchers/` | Wallet, LedgerEntry, VoucherTier types, code normaliser/validator |
 | venues | Venue map/list, slot picker, request status | Facilities, availability, venue requests | `venues/` | Facility, TimeSlot, VenueRequest types, `MapProvider` interface + OneMap/stub implementations, `haversineKm` |
@@ -376,7 +376,7 @@ Common to all: implemented with `db.runTransaction` (Admin SDK; all reads before
 - `ticketCode` = 8 random Crockford base32 chars (crypto); `qrPayload` = `qrSigner.sign(bookingId)`.
 - Output `{ bookingId, ticketCode, qrPayload, workshopSnapshot (ISO times), seatsRemaining }`.
 - Concurrency: every booking reads and writes the same workshop doc, so Firestore serialises them; a loser re-runs and sees the new `seatsTaken`. Deterministic booking id makes duplicate requests (double tap, two devices) collide on `tx.create`. Capacity cannot be exceeded. Test: 20 parallel calls on capacity 5 → exactly 5 `CONFIRMED`, 15 `WORKSHOP_FULL`; same learner twice in parallel → 1 success, 1 `ALREADY_BOOKED`.
-- No learner cancellation in the prototype (ADR-013).
+- Learner cancellation (ADR-026): `bookings-cancelBooking({ workshopId })` requires LEARNER and derives `${workshopId}_${uid}`. Tx reads booking and workshop, checks ownership, and accepts already CANCELLED as a no-write retry. Otherwise requires CONFIRMED, OPEN workshop, and current `startAt > now`; writes booking CANCELLED and `seatsTaken - 1` (floor zero) together. Retains the ticket; attendance rejects it. Rebooking remains disallowed.
 
 ### 4.2 QR payload format (tamper resistance)
 - Format: `SA1.<bookingId>.<sig>`; `sig = base64url(HMAC_SHA256(QR_HMAC_SECRET, "SA1." + bookingId))` truncated to 22 chars (~128 bits). Regex: `^SA1\.([A-Za-z0-9_]{1,128})\.([A-Za-z0-9_-]{22})$`.

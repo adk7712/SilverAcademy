@@ -1,6 +1,7 @@
 // Learner shell tabs: Discover, My Bookings, Report, Profile. Screens are owned by the feature in the comment.
 import { useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../design';
 import { strings } from '../i18n';
 import { DiscoverScreen, WorkshopDetailScreen } from '../features/workshops';
@@ -21,28 +22,40 @@ const MyBookingsStack = createStack([
 
 export function LearnerTabs() {
   const theme = useTheme();
-  const options = useMemo(() => tabScreenOptions(theme), [theme]);
+  const { bottom } = useSafeAreaInsets();
+  const options = useMemo(() => tabScreenOptions(theme, bottom), [theme, bottom]);
   return (
     <Tab.Navigator screenOptions={options}>
       <Tab.Screen
         name="DiscoverTab"
         component={DiscoverStack}
-        options={{ title: strings.nav.tabs.discover }}
+        options={{
+          title: strings.nav.tabs.discover,
+        }}
       />
+
       <Tab.Screen
         name="MyBookingsTab"
         component={MyBookingsStack}
-        options={{ title: strings.nav.tabs.myBookings }}
+        options={{
+          title: strings.nav.tabs.myBookings,
+        }}
       />
+
       <Tab.Screen
         name="ReportTab"
         component={ReportStack}
-        options={{ title: strings.nav.tabs.report }}
+        options={{
+          title: strings.nav.tabs.report,
+        }}
       />
+
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStack}
-        options={{ title: strings.nav.tabs.profile }}
+        options={{
+          title: strings.nav.tabs.profile,
+        }}
       />
     </Tab.Navigator>
   );

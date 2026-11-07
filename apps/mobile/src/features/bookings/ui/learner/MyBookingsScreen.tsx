@@ -15,6 +15,7 @@ import { format, strings } from '../../../../i18n';
 import { formatDateTime } from '../../../../services/dateFormat';
 import { useAppNavigation } from '../../../../navigation';
 import { groupBookings, type BookingView } from '../../controller/learnerBookingModel';
+import { CancelBookingAction } from './CancelBookingAction';
 import { useLearnerBookings } from '../../controller/useLearnerBookings';
 
 const TONE: Record<BookingView['status'], BadgeTone> = {
@@ -27,19 +28,27 @@ export function MyBookingsScreen() {
   const { spacing } = useTheme();
   const s = strings.bookingsLearner;
   const navigation = useAppNavigation();
-  const { bookings, loading, error, cachedAt, reload } = useLearnerBookings();
+  const { bookings, loading, error, cachedAt, reload, cancelling, cancelError, cancel } =
+    useLearnerBookings();
   const { upcoming, past } = groupBookings(bookings, new Date());
 
   const row = (b: BookingView) => (
-    <ListItem
-      key={b.id}
-      title={b.title}
-      subtitle={formatDateTime(b.startAt)}
-      meta={b.venueName}
-      right={<Badge label={s.status[b.status]} tone={TONE[b.status]} />}
-      onPress={() => navigation.navigate('Ticket', { bookingId: b.id })}
-      testID={`booking-${b.id}`}
-    />
+    <View key={b.id} style={{ gap: spacing.sm }}>
+      <ListItem
+        title={b.title}
+        subtitle={formatDateTime(b.startAt)}
+        meta={b.venueName}
+        right={<Badge label={s.status[b.status]} tone={TONE[b.status]} />}
+        onPress={() => navigation.navigate('Ticket', { bookingId: b.id })}
+        testID={`booking-${b.id}`}
+      />
+      <CancelBookingAction
+        booking={b}
+        offline={!!cachedAt}
+        busy={cancelling || loading}
+        onCancel={cancel}
+      />
+    </View>
   );
   const section = (title: string, items: BookingView[]) =>
     items.length === 0 ? null : (
@@ -51,6 +60,7 @@ export function MyBookingsScreen() {
 
   return (
     <Screen title={strings.bookings.myBookingsTitle}>
+      {cancelError ? <ErrorBanner message={cancelError} /> : null}
       {cachedAt ? (
         <ErrorBanner message={format(s.offlineNotice, { when: formatDateTime(cachedAt) })} />
       ) : null}
